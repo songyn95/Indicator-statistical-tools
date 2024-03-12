@@ -4,10 +4,14 @@ from utils.general import LOGGER
 from PIL import Image
 from collections import defaultdict
 from Algorithm_indicators.detection.detect import Detect
+from Algorithm_indicators.recognition.recongnize import Recongnize
+from Algorithm_indicators.classification.classify import Classify
 import numpy as np
 import torch
-from utils.plot import Annotator,Colors
+from utils.plot import Annotator, Colors
 import cv2
+
+
 class HandleFile:
     def __init__(self, opt):
         self.iou = opt.iou_thres
@@ -18,6 +22,8 @@ class HandleFile:
         self.file = opt.source_file
         self.fileinfo = self.readfile()
         self.detect = Detect(opt)
+        self.recongnize = Recongnize(opt)
+        self.classify = Classify(opt)
 
     def readfile(self):
         try:
@@ -40,7 +46,7 @@ class HandleFile:
         class_txt = dict()
         class_xml = defaultdict(list)
 
-        # 3. exist  find match txt xml
+        # 3. exist find match txt xml
         for i, line in enumerate(self.fileinfo):  # result.txt
             LOGGER.info(f"Handle line number:{i}, need match filename:{filename}")
             LOGGER.info(f"line:{line}")
@@ -51,28 +57,32 @@ class HandleFile:
                 class_xml.clear()
 
                 line_list = line.split()[1:]
-                assert not len(line_list)% 6, LOGGER.error(f"failed file data:{line}")
+                assert not len(line_list) % 6, LOGGER.error(f"failed file data:{line}")
 
                 # 处理line： filename class bbox conf:
                 # 00001.jpg, car, 0.1,0.1, 0.1, 0.1, 0.6 car, 0.1,0.1, 0.1, 0.1, 0.6
                 for j in range(0, len(line_list), 6):
-                    img_info = [float(ii) for ii in line_list[j+1:j+6]]
+                    img_info = [float(ii) for ii in line_list[j + 1:j + 6]]
                     if line_list[j] not in class_txt:
                         class_txt[line_list[j]] = [img_info]
                     else:
                         class_txt[line_list[j]] += [img_info]
 
-                #tensor
+                # tensor
                 for txt_key in class_txt:
                     class_txt[txt_key] = torch.Tensor(np.stack(class_txt[txt_key]).astype(np.float32))
 
                 # xml: filename, labelname, bbox, difficult:
                 # 00001, [car,dog], [[0.1,0.1, 0.1, 0.1],[0.1,0.1, 0.1, 0.1]], [0,0]
+                obj_info[2] = obj_info[2].squeeze().tolist()  # 降维
+                print(obj_info)
                 for key, value in zip(obj_info[1], obj_info[2]):
                     class_xml[key].append(value)
 
-                class_xml = dict(class_xml)#{"car":[[],[]]}
+                class_xml = dict(class_xml)  # {"car":[[],[]]}
 
+                for xml_key in class_xml:
+                    class_xml[xml_key] = torch.Tensor(np.stack(class_xml[xml_key]).astype(np.float32))
 
                 LOGGER.info(f"txt info:{class_txt}")
                 LOGGER.info(f"xml info:{class_xml}")
@@ -95,65 +105,35 @@ class HandleFile:
         img = os.path.join(self.img_path, filename)
         img = cv2.imread(img)
         annotator = Annotator(img)
-        class_dict = {'car':'0', 'sedan':'1'}
 
-        img_sz = [2304,1296]
+        # image width, height
+        height, width = img.shape[:2]
+        img_sz = [width, height]
+
+        # add true bbox
         for gt_key, gt_value in xml_info.items():
-            # plot
-            gt_value = gt_value[0]
+            # plot（xmin, ymin, xmax, ymax）
             gt_value[:, 0] = gt_value[:, 0] * img_sz[0]
             gt_value[:, 1] = gt_value[:, 1] * img_sz[1]
             gt_value[:, 2] = gt_value[:, 2] * img_sz[0]
             gt_value[:, 3] = gt_value[:, 3] * img_sz[1]
-            cls = class_dict[gt_key]
-            color = colors(cls)
-            print(f"gt_value1111:{gt_value}")
+            color = colors(gt_key)
             for j, box in enumerate(gt_value.tolist()):
-            # gt_key = f"{cls}" if gt_key else f"{cls} {conf[j]:.1f}"
-                annotator.box_label(box, cls, color=(255,0,0))
+                annotator.box_label(box, gt_key, color=color)
 
+        # add pred bbox
         for txt_key, txt_value in txt_info.items():
-            # plot
-            print(f"txt_info......")
-            cls = class_dict[txt_key]
-
+            # plot# plot（xmin, ymin, xmax, ymax）
             txt_value[:4, 0] = txt_value[:4, 0] * img_sz[1]
             txt_value[:4, 1] = txt_value[:4, 1] * img_sz[0]
             txt_value[:4, 2] = txt_value[:4, 2] * img_sz[1]
             txt_value[:4, 3] = txt_value[:4, 3] * img_sz[0]
-            print(f"txt_value:{txt_value}{txt_value.shape}")
-            col1, col2,col3, col4 = txt_value[:, 0], txt_value[:, 1],txt_value[:, 2],txt_value[:, 3]
-            txt_value = torch.tensor(np.vstack((col2,col1,col4,col3,txt_value[:, 4]))).T
+            col1, col2, col3, col4 = txt_value[:, 0], txt_value[:, 1], txt_value[:, 2], txt_value[:, 3]
+            txt_value = torch.tensor(np.vstack((col2, col1, col4, col3, txt_value[:, 4]))).T
 
-
-
-            print(f"txt_value:{txt_value}")
-            print(f"box[j][4]:{txt_value.tolist()}")
-
+            color = colors(txt_key)
             for j, box in enumerate(txt_value.tolist()):
-                print(box)
-                print(f"{cls} {str(box[4])}")
-                cls = f"{cls} {str(box[4])}"
-                print(cls)
-                annotator.box_label(box, cls, color=(0,255,0))
+                cls = f"{txt_key} {str(box[4])}"
+                annotator.box_label(box, txt_key, color=color)
 
         cv2.imwrite(os.path.join(self.save_img_path, filename), annotator.im)  # save
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

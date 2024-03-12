@@ -1,4 +1,4 @@
-#coding=utf-8
+# coding=utf-8
 from pathlib import Path
 import os
 import logging
@@ -35,12 +35,11 @@ def register_action(self, hook, name="", callback=None):
     self._callbacks[hook].append({"name": name, "callback": callback})
 
 
-
-
 def is_ascii(s=""):
     """Checks if input string `s` contains only ASCII characters; returns `True` if so, otherwise `False`."""
     s = str(s)  # convert list, tuple, None, etc. to str
     return len(s.encode().decode("ascii", "ignore")) == len(s)
+
 
 def colorstr(*input):
     """
@@ -70,11 +69,14 @@ def colorstr(*input):
         "bold": "\033[1m",
         "underline": "\033[4m",
     }
+    print("".join(colors[x] for x in args) + f"{string}" + colors["end"])
     return "".join(colors[x] for x in args) + f"{string}" + colors["end"]
+
 
 def methods(instance):
     """Returns list of method names for a class/instance excluding dunder methods."""
     return [f for f in dir(instance) if callable(getattr(instance, f)) and not f.startswith("__")]
+
 
 def set_logging(name=LOGGING_NAME, verbose=True):
     # sets up logging for the given name
@@ -84,7 +86,8 @@ def set_logging(name=LOGGING_NAME, verbose=True):
         {
             "version": 1,
             "disable_existing_loggers": False,
-            "formatters": {name: {"format": colorstr("%(asctime)s") + "-" + colorstr("%(pathname)s") + "-" + colorstr("%(lineno)s")+ "-" + colorstr("%(levelname)s")+ ": " + f"%(message)s"}},
+            "formatters": {name: {"format": colorstr("%(asctime)s") + "-" + colorstr("%(pathname)s") + "-" + colorstr(
+                "%(lineno)s") + "-" + colorstr("%(levelname)s") + ": " + f"%(message)s"}},
             "handlers": {
                 name: {
                     "class": "logging.StreamHandler",
@@ -105,8 +108,6 @@ def set_logging(name=LOGGING_NAME, verbose=True):
 
 set_logging(LOGGING_NAME)  # run before defining LOGGER
 LOGGER = logging.getLogger(LOGGING_NAME)  # define globally (used in train.py, val.py, detection.py, etc.)
-
-
 
 
 class Profile(contextlib.ContextDecorator):
@@ -173,6 +174,7 @@ def print_args(args=None, show_file=True, show_func=False):
     s = (f"{file}: " if show_file else "") + (f"{func}: " if show_func else "")
     LOGGER.info(", ".join(f"{k}={v}" for k, v in args.items()))
 
+
 def intersect_dicts(da, db, exclude=()):
     # Dictionary intersection of matching keys and shapes, omitting 'exclude' keys, using da values
     return {k: v for k, v in da.items() if k in db and all(x not in k for x in exclude) and v.shape == db[k].shape}
@@ -196,7 +198,6 @@ def file_size(path):
         return 0.0
 
 
-
 def check_file(file, suffix=""):
     # Search/download file (if necessary) and return path
     # check_suffix(file, suffix)  # optional
@@ -205,7 +206,7 @@ def check_file(file, suffix=""):
         return file
     elif file.startswith("clearml://"):  # ClearML Dataset ID
         assert (
-            "clearml" in sys.modules
+                "clearml" in sys.modules
         ), "ClearML is not installed, so cannot use ClearML dataset. Try running 'pip install clearml'."
         return file
     else:  # search
@@ -216,6 +217,7 @@ def check_file(file, suffix=""):
         assert len(files) == 1, f"Multiple files match '{file}', specify exact path: {files}"  # assert unique
         return files[0]  # return file
 
+
 def xywh2xyxy(x):
     """Convert nx4 boxes from [x, y, w, h] to [x1, y1, x2, y2] where xy1=top-left, xy2=bottom-right."""
     y = x.clone() if isinstance(x, torch.Tensor) else np.copy(x)
@@ -224,6 +226,7 @@ def xywh2xyxy(x):
     y[..., 2] = x[..., 0] + x[..., 2] / 2  # bottom right x
     y[..., 3] = x[..., 1] + x[..., 3] / 2  # bottom right y
     return y
+
 
 def increment_path(path, exist_ok=False, sep="", mkdir=False):
     # Increment file or directory path, i.e. runs/exp --> runs/exp{sep}2, runs/exp{sep}3, ... etc.

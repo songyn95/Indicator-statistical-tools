@@ -1,4 +1,4 @@
-#coding=utf-8
+# coding=utf-8
 import os
 
 import numpy as np
@@ -6,7 +6,9 @@ import torch
 from utils.general import LOGGER
 from matplotlib import pyplot as plt
 import matplotlib
-from utils.plot import Annotator,Colors
+from utils.plot import Annotator, Colors
+
+
 ##检测框架，集合检测功能
 class Detect():
     def __init__(self, opt):
@@ -25,15 +27,15 @@ class Detect():
         return inter / ((a2 - a1).prod(2) + (b2 - b1).prod(2) - inter + eps)
 
     def compare_index(self, xml_info, txt_info):
-        #iou过滤  一行内容
+        # iou过滤  一行内容
         for gt_key, gt_value in xml_info.items():
-            #判断真值数量是否一致
-            gt = txt_info.get(gt_key,0)
+            # 判断真值数量是否一致
+            gt = txt_info.get(gt_key, 0)
             # 类别以及bbox满足要求：
             # 1. 有gt对应的类别
             # 2. iou满足要求
 
-            self.gt_nums += gt_value[0].shape[0]
+            self.gt_nums += gt_value.shape[0]
 
             for txt_key, txt_value in txt_info.items():
                 self.detect_nums += txt_value.shape[0]
@@ -43,8 +45,8 @@ class Detect():
 
                 txt_value = txt_value[txt_value[:, 4] > self.conf]
 
-                iou = self.compute_iou(gt_value[0], txt_value[:,:4])
-                x = torch.where(iou > self.iou_thres)  #filter iou
+                iou = self.compute_iou(gt_value, txt_value[:, :4])
+                x = torch.where(iou > self.iou_thres)  # filter iou
                 LOGGER.info(f"iou result: {iou}, shape:{iou.shape}")
                 if x[0].shape[0]:
                     matches = torch.cat((torch.stack(x, 1), iou[x[0], x[1]][:, None]), 1).cpu().numpy()
@@ -59,35 +61,13 @@ class Detect():
                 n = matches.shape[0] > 0
                 LOGGER.info(f"match result:{matches}, nums:{matches.shape[0]}")
 
-                print(txt_key,gt_key)
-                if(txt_key == gt_key): #正确数量
-                        self.correct_detect_nums += n
-
-
+                print(txt_key, gt_key)
+                if (txt_key == gt_key):  # 正确数量
+                    self.correct_detect_nums += n
 
     def get_index(self):
         LOGGER.info(
-            f'all detect nums: {self.detect_nums},correct detect nums: {self.correct_detect_nums},precision:{self.correct_detect_nums/self.detect_nums:.3f}\n'
+            f'all detect nums: {self.detect_nums},correct detect nums: {self.correct_detect_nums},precision:{self.correct_detect_nums / self.detect_nums:.3f}\n'
             f'all gt nums: {self.gt_nums},correct detect nums: {self.correct_detect_nums}, recall:{self.correct_detect_nums / self.gt_nums:.3f}\n'
 
         )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

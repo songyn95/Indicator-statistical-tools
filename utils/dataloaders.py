@@ -1,4 +1,4 @@
-#coding=utf-8
+# coding=utf-8
 from xml.etree import ElementTree as ET
 import glob
 from pathlib import Path
@@ -10,12 +10,11 @@ from utils.general import LOGGER
 from torch.utils.data import dataloader
 
 
-def create_dataloader(path,batch=1):
+def create_dataloader(path, batch=1):
     LOGGER.info(f'create dataloader path: {path}\tbatch size: {batch} ')
-    dataset = Dataset(path,batch)
-    loader =InfiniteDataLoader(dataset,batch)
-    return loader,dataset
-
+    dataset = Dataset(path, batch)
+    loader = InfiniteDataLoader(dataset, batch)
+    return loader, dataset
 
 
 class Dataset:
@@ -42,7 +41,7 @@ class Dataset:
             raise Exception(f"Error loading data from {path}:") from e
 
     def __getitem__(self, index):
-        #逐个获取xml文件
+        # 逐个获取xml文件
         id_ = self.im_files[index]
         anno = ET.parse(id_)
 
@@ -50,32 +49,33 @@ class Dataset:
         labelname = list()
         difficult = list()
 
-        filename = anno.find('path').text.strip().split(os.sep)[-1] ## filename 000001.jpg
+        filename = anno.find('path').text.strip().split(os.sep)[-1]  ## filename 000001.jpg
         LOGGER.info(f'{filename} handling.... ')
 
-       #获取图像标签大小
-        img_sz = [0,0] #width height
+        # 获取图像标签大小
+        img_sz = [0, 0]  # width height
         for img_info in anno.findall('size'):
             img_sz[0] = int(img_info.find('width').text)
             img_sz[1] = int(img_info.find('height').text)
 
         for obj in anno.findall('object'):
-            if int(obj.find('difficult').text) == 1:  #0表示易识别，1表示难识别
+            if int(obj.find('difficult').text) == 1:  # 0表示易识别，1表示难识别
                 continue
 
             difficult.append(int(obj.find('difficult').text))
             bndbox_anno = obj.find('bndbox')
-            bbox.append([float(bndbox_anno.find(tag).text)/img_sz[1] if tag in ['ymin','ymax'] else float(bndbox_anno.find(tag).text)/img_sz[0] for tag in ('xmin', 'ymin', 'xmax', 'ymax')] )
+            bbox.append([float(bndbox_anno.find(tag).text) / img_sz[1] if tag in ['ymin', 'ymax'] else float(
+                bndbox_anno.find(tag).text) / img_sz[0] for tag in ('xmin', 'ymin', 'xmax', 'ymax')])
             labelname.append(obj.find('name').text.strip())
 
         bbox = np.stack(bbox).astype(np.float32)  ##boundingbox
         # label = np.stack(label).astype(np.int32)  #标签读取，需要
         difficult = np.array(difficult, dtype=bool).astype(np.uint8)
-        return filename, labelname, bbox,  difficult
-
+        return filename, labelname, bbox, difficult
 
     def __len__(self):
         return len(self.im_files)
+
 
 class InfiniteDataLoader(dataloader.DataLoader):
     """
@@ -100,6 +100,7 @@ class InfiniteDataLoader(dataloader.DataLoader):
         """Yields batches of data indefinitely in a loop by resetting the sampler when exhausted."""
         for _ in range(len(self)):
             yield next(self.iterator)
+
 
 class _RepeatSampler:
     """

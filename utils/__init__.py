@@ -1,17 +1,18 @@
 import contextlib
 import platform
 
+
 def emojis(str=""):
     """Returns an emoji-safe version of a string, stripped of emojis on Windows platforms."""
     return str.encode().decode("ascii", "ignore") if platform.system() == "Windows" else str
 
+
 class TryExcept(contextlib.ContextDecorator):
     # TryExcept class. Usage: @TryExcept() decorator or 'with TryExcept():' context manager
-    def __init__(self, file="result.txt",msg=""):
+    def __init__(self, file="result.txt", msg=""):
         """Initializes TryExcept with an optional message, used as a decorator or context manager for error handling."""
         self.file = file
         self.msg = msg
-
 
     def __enter__(self):
         """Enter the runtime context related to this object for error handling with an optional message."""

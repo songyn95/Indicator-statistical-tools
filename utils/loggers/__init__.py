@@ -1,4 +1,4 @@
-#coding=utf-8
+# coding=utf-8
 """Logging utils."""
 import os
 
@@ -7,6 +7,7 @@ import pkg_resources as pkg
 from utils.general import LOGGER, colorstr
 from utils.loggers.clearml.clearml_utils import ClearmlLogger
 from utils.loggers.wandb.wandb_utils import WandbLogger
+
 # from utils.plots import plot_images, plot_labels, plot_results
 
 LOGGERS = ("csv", "tb", "wandb", "clearml", "comet")  # *.csv, TensorBoard, Weights & Biases, ClearML
@@ -49,7 +50,8 @@ try:
 except (ImportError, AssertionError):
     comet_ml = None
 
-#csv统计结果表
+
+# csv统计结果表
 class Loggers:
     # Loggers class
     def __init__(self, save_dir=None, opt=None, logger=None, include=LOGGERS):
@@ -58,12 +60,12 @@ class Loggers:
         self.logger = logger  # for printing results to console
         self.include = include
         self.keys = [
-            "IOU", #交并比
-            "threshold", #置信度阈值
-            "precision",#精度
-            "recall",   #召回率
-            "allDetectNum",#所有检出数量
-            "CorrectNum",  #正确检出数量
+            "IOU",  # 交并比
+            "threshold",  # 置信度阈值
+            "precision",  # 精度
+            "recall",  # 召回率
+            "allDetectNum",  # 所有检出数量
+            "CorrectNum",  # 正确检出数量
         ]  # params
         self.best_keys = ["precision", "recall", "allDetectNum", "CorrectNum"]
         for k in LOGGERS:
@@ -116,6 +118,7 @@ class Loggers:
 
             else:
                 self.comet_logger = None
+
     @property
     def remote_dataset(self):
         """Fetches dataset dictionary from remote logging services like ClearML, Weights & Biases, or Comet ML."""
@@ -128,6 +131,7 @@ class Loggers:
             data_dict = self.comet_logger.data_dict
 
         return data_dict
+
 
 def web_project_name(project):
     # Convert local project name to web project name

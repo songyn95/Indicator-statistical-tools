@@ -1,8 +1,6 @@
-#coding=utf-8
+# coding=utf-8
 
 ##识别框架，集合识别功能
 class Recongnize():
-    def __init__(self):
+    def __init__(self, opt):
         pass
-
-

@@ -1,0 +1,38 @@
+<annotation>
+	<folder>images</folder>
+	<filename>000006.jpg</filename>
+	<path>F:\00 测试集合\02 机动车\北京\images_labeled\images\000006.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>2304</width>
+		<height>1296</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>sedan</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1291</xmin>
+			<ymin>567</ymin>
+			<xmax>1981</xmax>
+			<ymax>1279</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>sedan</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>951</xmin>
+			<ymin>78</ymin>
+			<xmax>1122</xmax>
+			<ymax>234</ymax>
+		</bndbox>
+	</object>
+</annotation>

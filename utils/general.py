@@ -69,7 +69,6 @@ def colorstr(*input):
         "bold": "\033[1m",
         "underline": "\033[4m",
     }
-    print("".join(colors[x] for x in args) + f"{string}" + colors["end"])
     return "".join(colors[x] for x in args) + f"{string}" + colors["end"]
 
 
@@ -86,8 +85,9 @@ def set_logging(name=LOGGING_NAME, verbose=True):
         {
             "version": 1,
             "disable_existing_loggers": False,
-            "formatters": {name: {"format": colorstr("%(asctime)s") + "-" + colorstr("%(pathname)s") + "-" + colorstr(
+            "formatters": {name: {"format": colorstr("%(asctime)s") + "-" + colorstr(
                 "%(lineno)s") + "-" + colorstr("%(levelname)s") + ": " + f"%(message)s"}},
+            # "formatters": {name: {"format": "%(asctime)s %(filename)s %(lineno)s %(levelname)s %(message)s"}},
             "handlers": {
                 name: {
                     "class": "logging.StreamHandler",

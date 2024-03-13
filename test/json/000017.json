@@ -1,0 +1,254 @@
+{
+  "version": "2.3.2",
+  "flags": {},
+  "shapes": [
+    {
+      "label": "car",
+      "points": [
+        [
+          212.0,
+          288.0
+        ],
+        [
+          795.0,
+          288.0
+        ],
+        [
+          795.0,
+          738.0
+        ],
+        [
+          212.0,
+          738.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          1155.0,
+          64.0
+        ],
+        [
+          1286.0,
+          64.0
+        ],
+        [
+          1286.0,
+          168.0
+        ],
+        [
+          1155.0,
+          168.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          1474.0,
+          4.0
+        ],
+        [
+          1526.0,
+          4.0
+        ],
+        [
+          1526.0,
+          57.0
+        ],
+        [
+          1474.0,
+          57.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "train",
+      "points": [
+        [
+          1499.0,
+          2.0
+        ],
+        [
+          2563.0,
+          2.0
+        ],
+        [
+          2563.0,
+          1334.0
+        ],
+        [
+          1499.0,
+          1334.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "boat",
+      "points": [
+        [
+          1589.0,
+          914.0
+        ],
+        [
+          1767.0,
+          914.0
+        ],
+        [
+          1767.0,
+          1011.0
+        ],
+        [
+          1589.0,
+          1011.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "bus",
+      "points": [
+        [
+          1498.0,
+          1.0
+        ],
+        [
+          1847.0,
+          1.0
+        ],
+        [
+          1847.0,
+          310.0
+        ],
+        [
+          1498.0,
+          310.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "person",
+      "points": [
+        [
+          2237.0,
+          1162.0
+        ],
+        [
+          2296.0,
+          1162.0
+        ],
+        [
+          2296.0,
+          1248.0
+        ],
+        [
+          2237.0,
+          1248.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          1418.0,
+          0.0
+        ],
+        [
+          1523.0,
+          0.0
+        ],
+        [
+          1523.0,
+          54.0
+        ],
+        [
+          1418.0,
+          54.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "person",
+      "points": [
+        [
+          1836.0,
+          542.0
+        ],
+        [
+          1903.0,
+          542.0
+        ],
+        [
+          1903.0,
+          706.0
+        ],
+        [
+          1836.0,
+          706.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    }
+  ],
+  "imagePath": "..\\images\\000017.jpg",
+  "imageData": null,
+  "imageHeight": 1440,
+  "imageWidth": 2560,
+  "text": ""
+}

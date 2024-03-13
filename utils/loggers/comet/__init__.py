@@ -296,7 +296,7 @@ class CometLogger:
         return
 
     def preprocess_prediction(self, image, labels, shape, pred):
-        """Processes prediction data, resizing labels and adding dataset metadata."""
+        """Processes json data, resizing labels and adding dataset metadata."""
         nl, _ = labels.shape[0], pred.shape[0]
 
         # Predictions

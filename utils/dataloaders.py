@@ -11,7 +11,7 @@ from torch.utils.data import dataloader
 
 
 def create_dataloader(path, batch=1):
-    LOGGER.info(f'create dataloader path: {path}\tbatch size: {batch} ')
+    LOGGER.info(f'GT dataloader path: {path}\tbatch_size: {batch} ')
     dataset = Dataset(path, batch)
     loader = InfiniteDataLoader(dataset, batch)
     return loader, dataset
@@ -50,7 +50,6 @@ class Dataset:
         difficult = list()
 
         filename = anno.find('path').text.strip().split(os.sep)[-1]  ## filename 000001.jpg
-        LOGGER.info(f'{filename} handling.... ')
 
         # 获取图像标签大小
         img_sz = [0, 0]  # width height
@@ -64,8 +63,9 @@ class Dataset:
 
             difficult.append(int(obj.find('difficult').text))
             bndbox_anno = obj.find('bndbox')
-            bbox.append([float(bndbox_anno.find(tag).text) / img_sz[1] if tag in ['ymin', 'ymax'] else float(
-                bndbox_anno.find(tag).text) / img_sz[0] for tag in ('xmin', 'ymin', 'xmax', 'ymax')])
+            # bbox.append([float(bndbox_anno.find(tag).text) / img_sz[1] if tag in ['ymin', 'ymax'] else float(
+            #     bndbox_anno.find(tag).text) / img_sz[0] for tag in ('xmin', 'ymin', 'xmax', 'ymax')])
+            bbox.append([int(bndbox_anno.find(tag).text) for tag in ('xmin', 'ymin', 'xmax', 'ymax')])
             labelname.append(obj.find('name').text.strip())
 
         bbox = np.stack(bbox).astype(np.float32)  ##boundingbox

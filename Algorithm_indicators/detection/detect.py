@@ -4,22 +4,21 @@ import os
 import numpy as np
 import torch
 from utils.general import LOGGER
-from matplotlib import pyplot as plt
-import matplotlib
 from utils.plot import Annotator, Colors
 
 
 ##检测框架，集合检测功能
-class Detect():
+class Detect:
     def __init__(self, opt):
         self.iou = opt.iou_thres
         self.conf = opt.conf_thres
-
         self.gt_nums = 0
         self.detect_nums = 0
         self.correct_detect_nums = 0
 
     def compute_iou(self, box1, box2, eps=1e-7):
+        print(box1)
+        print(box2)
         (a1, a2), (b1, b2) = box1.unsqueeze(1).chunk(2, 2), box2.unsqueeze(0).chunk(2, 2)
         inter = (torch.min(a2, b2) - torch.max(a1, b1)).clamp(0).prod(2)
 
@@ -27,14 +26,10 @@ class Detect():
         return inter / ((a2 - a1).prod(2) + (b2 - b1).prod(2) - inter + eps)
 
     def compare_index(self, xml_info, txt_info):
-        # iou过滤  一行内容
         for gt_key, gt_value in xml_info.items():
-            # 判断真值数量是否一致
-            gt = txt_info.get(gt_key, 0)
             # 类别以及bbox满足要求：
             # 1. 有gt对应的类别
             # 2. iou满足要求
-
             self.gt_nums += gt_value.shape[0]
 
             for txt_key, txt_value in txt_info.items():
@@ -44,9 +39,11 @@ class Detect():
                     continue
 
                 txt_value = txt_value[txt_value[:, 4] > self.conf]
+                print(f"gt:{gt_value}")
+                print(f"txt:{txt_value}")
 
                 iou = self.compute_iou(gt_value, txt_value[:, :4])
-                x = torch.where(iou > self.iou_thres)  # filter iou
+                x = torch.where(iou > self.iou)  # filter iou
                 LOGGER.info(f"iou result: {iou}, shape:{iou.shape}")
                 if x[0].shape[0]:
                     matches = torch.cat((torch.stack(x, 1), iou[x[0], x[1]][:, None]), 1).cpu().numpy()
@@ -62,12 +59,23 @@ class Detect():
                 LOGGER.info(f"match result:{matches}, nums:{matches.shape[0]}")
 
                 print(txt_key, gt_key)
-                if (txt_key == gt_key):  # 正确数量
+                if txt_key == gt_key:  # 正确数量
                     self.correct_detect_nums += n
 
-    def get_index(self):
-        LOGGER.info(
-            f'all detect nums: {self.detect_nums},correct detect nums: {self.correct_detect_nums},precision:{self.correct_detect_nums / self.detect_nums:.3f}\n'
-            f'all gt nums: {self.gt_nums},correct detect nums: {self.correct_detect_nums}, recall:{self.correct_detect_nums / self.gt_nums:.3f}\n'
+    def get_index(self, eps=1e-7):
 
+        pricision = "{:.4f}".format(self.correct_detect_nums / (self.detect_nums + eps))
+        recall = "{:.4f}".format(self.correct_detect_nums / (self.gt_nums + eps))
+
+        data = {"iou": self.iou, "Confidence": self.conf, "gt": self.gt_nums,
+                "detect": self.detect_nums, "correct": self.correct_detect_nums,
+                "pricision": pricision, "recall": recall}
+
+        LOGGER.info(
+            f'all detect nums: {self.detect_nums},correct detect nums: {self.correct_detect_nums},'
+            f' precision:{self.correct_detect_nums / (self.detect_nums + eps) * 100:.2f}%\n'
+            f'all gt nums: {self.gt_nums},correct detect nums: {self.correct_detect_nums}, '
+            f'recall:{self.correct_detect_nums / (self.gt_nums + eps) * 100:.2f}%\n'
         )
+
+        return data

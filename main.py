@@ -30,7 +30,7 @@ def parse_opt():
     parser.add_argument("--imgsz", "--img", "--img-size", type=int, default=1920, help="img size")
     parser.add_argument("--img-path", type=str, default=ROOT / 'test', help="img path")
     parser.add_argument("--save-img-path", type=str, default=ROOT / 'save_pic', help=" save img path")
-    parser.add_argument("--iou-thres-setting", action="store_false", help=" Threshold 0-1 interval 0.001")
+    parser.add_argument("--conf-thres-setting", action="store_false", help=" Threshold 0-1 interval 0.001")
     parser.add_argument("--save-dir", default=ROOT / 'exp', help="save to project/name")
 
     opt = parser.parse_args()
@@ -65,10 +65,10 @@ def main(opt):
     # result_path = data_dict["result"]
 
     data_dict = loggers.remote_dataset
-    if opt.iou_thres_setting:
-        for iou_thres in range(0, 1001, 1):
-            i_iou_thres = iou_thres / 1000
-            opt.iou_thres = i_iou_thres
+    if opt.conf_thres_setting:
+        for conf_thres in range(0, 1001, 1):
+            i_conf_thres = conf_thres / 1000
+            opt.conf_thres = i_conf_thres
             # 1. dataloader
             dataloader, dataset = create_dataloader(opt.Manually_annotate_dir)
             LOGGER.info(f'dataloader sizes {len(dataloader)}')

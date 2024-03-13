@@ -1,0 +1,146 @@
+{
+  "version": "2.3.2",
+  "flags": {},
+  "shapes": [
+    {
+      "label": "car",
+      "points": [
+        [
+          108.0,
+          304.0
+        ],
+        [
+          718.0,
+          304.0
+        ],
+        [
+          718.0,
+          789.0
+        ],
+        [
+          108.0,
+          789.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "truck",
+      "points": [
+        [
+          1488.0,
+          0.0
+        ],
+        [
+          1840.0,
+          0.0
+        ],
+        [
+          1840.0,
+          299.0
+        ],
+        [
+          1488.0,
+          299.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "person",
+      "points": [
+        [
+          1358.0,
+          69.0
+        ],
+        [
+          1398.0,
+          69.0
+        ],
+        [
+          1398.0,
+          148.0
+        ],
+        [
+          1358.0,
+          148.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          1477.0,
+          0.0
+        ],
+        [
+          1547.0,
+          0.0
+        ],
+        [
+          1547.0,
+          58.0
+        ],
+        [
+          1477.0,
+          58.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          1409.0,
+          1.0
+        ],
+        [
+          1470.0,
+          1.0
+        ],
+        [
+          1470.0,
+          39.0
+        ],
+        [
+          1409.0,
+          39.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    }
+  ],
+  "imagePath": "..\\images\\000014.jpg",
+  "imageData": null,
+  "imageHeight": 1440,
+  "imageWidth": 2560,
+  "text": ""
+}

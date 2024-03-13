@@ -1,0 +1,821 @@
+{
+  "version": "2.3.2",
+  "flags": {},
+  "shapes": [
+    {
+      "label": "car",
+      "points": [
+        [
+          7.0,
+          915.0
+        ],
+        [
+          1129.0,
+          915.0
+        ],
+        [
+          1129.0,
+          1435.0
+        ],
+        [
+          7.0,
+          1435.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          1792.0,
+          263.0
+        ],
+        [
+          1908.0,
+          263.0
+        ],
+        [
+          1908.0,
+          337.0
+        ],
+        [
+          1792.0,
+          337.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          1639.0,
+          260.0
+        ],
+        [
+          1751.0,
+          260.0
+        ],
+        [
+          1751.0,
+          330.0
+        ],
+        [
+          1639.0,
+          330.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          1590.0,
+          227.0
+        ],
+        [
+          1679.0,
+          227.0
+        ],
+        [
+          1679.0,
+          296.0
+        ],
+        [
+          1590.0,
+          296.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          1528.0,
+          230.0
+        ],
+        [
+          1599.0,
+          230.0
+        ],
+        [
+          1599.0,
+          282.0
+        ],
+        [
+          1528.0,
+          282.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "person",
+      "points": [
+        [
+          1733.0,
+          276.0
+        ],
+        [
+          1779.0,
+          276.0
+        ],
+        [
+          1779.0,
+          377.0
+        ],
+        [
+          1733.0,
+          377.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "person",
+      "points": [
+        [
+          2142.0,
+          548.0
+        ],
+        [
+          2258.0,
+          548.0
+        ],
+        [
+          2258.0,
+          706.0
+        ],
+        [
+          2142.0,
+          706.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "motorcycle",
+      "points": [
+        [
+          2158.0,
+          615.0
+        ],
+        [
+          2273.0,
+          615.0
+        ],
+        [
+          2273.0,
+          794.0
+        ],
+        [
+          2158.0,
+          794.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "motorcycle",
+      "points": [
+        [
+          2044.0,
+          411.0
+        ],
+        [
+          2130.0,
+          411.0
+        ],
+        [
+          2130.0,
+          472.0
+        ],
+        [
+          2044.0,
+          472.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "person",
+      "points": [
+        [
+          2060.0,
+          363.0
+        ],
+        [
+          2126.0,
+          363.0
+        ],
+        [
+          2126.0,
+          440.0
+        ],
+        [
+          2060.0,
+          440.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "motorcycle",
+      "points": [
+        [
+          2377.0,
+          691.0
+        ],
+        [
+          2559.0,
+          691.0
+        ],
+        [
+          2559.0,
+          902.0
+        ],
+        [
+          2377.0,
+          902.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "motorcycle",
+      "points": [
+        [
+          2483.0,
+          719.0
+        ],
+        [
+          2559.0,
+          719.0
+        ],
+        [
+          2559.0,
+          910.0
+        ],
+        [
+          2483.0,
+          910.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "parking meter",
+      "points": [
+        [
+          783.0,
+          759.0
+        ],
+        [
+          882.0,
+          759.0
+        ],
+        [
+          882.0,
+          874.0
+        ],
+        [
+          783.0,
+          874.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "person",
+      "points": [
+        [
+          2429.0,
+          642.0
+        ],
+        [
+          2540.0,
+          642.0
+        ],
+        [
+          2540.0,
+          860.0
+        ],
+        [
+          2429.0,
+          860.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          1709.0,
+          241.0
+        ],
+        [
+          1777.0,
+          241.0
+        ],
+        [
+          1777.0,
+          288.0
+        ],
+        [
+          1709.0,
+          288.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          1488.0,
+          184.0
+        ],
+        [
+          1547.0,
+          184.0
+        ],
+        [
+          1547.0,
+          246.0
+        ],
+        [
+          1488.0,
+          246.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "motorcycle",
+      "points": [
+        [
+          54.0,
+          525.0
+        ],
+        [
+          162.0,
+          525.0
+        ],
+        [
+          162.0,
+          637.0
+        ],
+        [
+          54.0,
+          637.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          2069.0,
+          237.0
+        ],
+        [
+          2147.0,
+          237.0
+        ],
+        [
+          2147.0,
+          278.0
+        ],
+        [
+          2069.0,
+          278.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "motorcycle",
+      "points": [
+        [
+          2277.0,
+          410.0
+        ],
+        [
+          2372.0,
+          410.0
+        ],
+        [
+          2372.0,
+          472.0
+        ],
+        [
+          2277.0,
+          472.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          2459.0,
+          343.0
+        ],
+        [
+          2511.0,
+          343.0
+        ],
+        [
+          2511.0,
+          382.0
+        ],
+        [
+          2459.0,
+          382.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "traffic light",
+      "points": [
+        [
+          482.0,
+          82.0
+        ],
+        [
+          539.0,
+          82.0
+        ],
+        [
+          539.0,
+          177.0
+        ],
+        [
+          482.0,
+          177.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          2522.0,
+          369.0
+        ],
+        [
+          2559.0,
+          369.0
+        ],
+        [
+          2559.0,
+          422.0
+        ],
+        [
+          2522.0,
+          422.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "person",
+      "points": [
+        [
+          2332.0,
+          341.0
+        ],
+        [
+          2364.0,
+          341.0
+        ],
+        [
+          2364.0,
+          413.0
+        ],
+        [
+          2332.0,
+          413.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "parking meter",
+      "points": [
+        [
+          959.0,
+          754.0
+        ],
+        [
+          1038.0,
+          754.0
+        ],
+        [
+          1038.0,
+          864.0
+        ],
+        [
+          959.0,
+          864.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          2410.0,
+          326.0
+        ],
+        [
+          2459.0,
+          326.0
+        ],
+        [
+          2459.0,
+          372.0
+        ],
+        [
+          2410.0,
+          372.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          1256.0,
+          195.0
+        ],
+        [
+          1306.0,
+          195.0
+        ],
+        [
+          1306.0,
+          233.0
+        ],
+        [
+          1256.0,
+          233.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "person",
+      "points": [
+        [
+          2447.0,
+          639.0
+        ],
+        [
+          2531.0,
+          639.0
+        ],
+        [
+          2531.0,
+          757.0
+        ],
+        [
+          2447.0,
+          757.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "motorcycle",
+      "points": [
+        [
+          322.0,
+          348.0
+        ],
+        [
+          400.0,
+          348.0
+        ],
+        [
+          400.0,
+          436.0
+        ],
+        [
+          322.0,
+          436.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          1987.0,
+          263.0
+        ],
+        [
+          2071.0,
+          263.0
+        ],
+        [
+          2071.0,
+          325.0
+        ],
+        [
+          1987.0,
+          325.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    },
+    {
+      "label": "car",
+      "points": [
+        [
+          1755.0,
+          220.0
+        ],
+        [
+          1810.0,
+          220.0
+        ],
+        [
+          1810.0,
+          265.0
+        ],
+        [
+          1755.0,
+          265.0
+        ]
+      ],
+      "group_id": null,
+      "description": null,
+      "difficult": false,
+      "shape_type": "rectangle",
+      "flags": null,
+      "attributes": {}
+    }
+  ],
+  "imagePath": "..\\images\\000070.jpg",
+  "imageData": null,
+  "imageHeight": 1440,
+  "imageWidth": 2560,
+  "text": ""
+}

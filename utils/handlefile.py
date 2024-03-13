@@ -1,7 +1,6 @@
 # coding=utf-8
 import os
 from utils.general import LOGGER
-from PIL import Image
 from collections import defaultdict
 from Algorithm_indicators.detection.detect import Detect
 from Algorithm_indicators.recognition.recongnize import Recongnize
@@ -10,20 +9,31 @@ import numpy as np
 import torch
 from utils.plot import Annotator, Colors
 import cv2
+import csv
+import pandas as pd
+from pathlib import Path
+from matplotlib import pyplot as plt
+import matplotlib
+
+FILE = Path(__file__).resolve()
+ROOT = FILE.parents[0]  # root directory
 
 
 class HandleFile:
     def __init__(self, opt):
-        self.iou = opt.iou_thres
-        self.conf = opt.conf_thres
         self.img_path = opt.img_path
         self.save_img_path = opt.save_img_path
+        self.save_csv_path = opt.save_csv_path
 
         self.file = opt.source_file
         self.fileinfo = self.readfile()
-        self.detect = Detect(opt)
-        self.recongnize = Recongnize(opt)
-        self.classify = Classify(opt)
+        self.opt = opt
+
+        self.detect = Detect(self.opt)
+        self.recongnize = Recongnize(self.opt)
+        self.classify = Classify(self.opt)
+
+
 
     def readfile(self):
         try:
@@ -48,10 +58,7 @@ class HandleFile:
 
         # 3. exist find match txt xml
         for i, line in enumerate(self.fileinfo):  # result.txt
-            LOGGER.info(f"Handle line number:{i}, need match filename:{filename}")
-            LOGGER.info(f"line:{line}")
-
-            if (filename.split('.')[0] in line):
+            if filename.split('.')[0] in line:
 
                 class_txt.clear()
                 class_xml.clear()
@@ -75,7 +82,6 @@ class HandleFile:
                 # xml: filename, labelname, bbox, difficult:
                 # 00001, [car,dog], [[0.1,0.1, 0.1, 0.1],[0.1,0.1, 0.1, 0.1]], [0,0]
                 obj_info[2] = obj_info[2].squeeze().tolist()  # 降维
-                print(obj_info)
                 for key, value in zip(obj_info[1], obj_info[2]):
                     class_xml[key].append(value)
 
@@ -99,13 +105,41 @@ class HandleFile:
     def get_index(self):
         self.detect.get_index()
 
+    def write_to_csv(self):
+        """Writes json data for an image to a CSV file, appending if the file exists."""
+        data = self.detect.get_index()
+        with open(self.save_csv_path, mode="a", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=data.keys())
+            if not self.save_csv_path.is_file():
+                writer.writeheader()
+            writer.writerow(data)
+
+    def plot_evolve(self):
+        """
+        Plots hyperparameter evolution results from a given CSV, saving the plot and displaying best results.
+
+        Example: from utils.plots import *; plot_evolve()
+        """
+        evolve_csv = Path(self.save_csv_path)
+        data = pd.read_csv(evolve_csv)
+        keys = [x.strip() for x in data.columns]
+        x = data.values[:, ]
+        plt.figure(figsize=(10, 12), tight_layout=True)
+        matplotlib.rc("font", **{"size": 8})
+
+        plt.plot(x[:, -2], x[:, -1])
+        plt.title(f"iou:(0-1) PR curves")
+        f = evolve_csv.with_suffix(".png")  # filename
+        plt.savefig(f, dpi=200)
+        plt.close()
+        print(f"Saved {f}")
+
     def plot_labels(self, xml_info, txt_info, filename):
         """Plots dataset labels, saving correlogram and label images, handles classes, and visualizes bounding boxes."""
         colors = Colors()
         img = os.path.join(self.img_path, filename)
         img = cv2.imread(img)
         annotator = Annotator(img)
-
         # image width, height
         height, width = img.shape[:2]
         img_sz = [width, height]
@@ -113,27 +147,20 @@ class HandleFile:
         # add true bbox
         for gt_key, gt_value in xml_info.items():
             # plot（xmin, ymin, xmax, ymax）
-            gt_value[:, 0] = gt_value[:, 0] * img_sz[0]
-            gt_value[:, 1] = gt_value[:, 1] * img_sz[1]
-            gt_value[:, 2] = gt_value[:, 2] * img_sz[0]
-            gt_value[:, 3] = gt_value[:, 3] * img_sz[1]
-            color = colors(gt_key)
             for j, box in enumerate(gt_value.tolist()):
-                annotator.box_label(box, gt_key, color=color)
+                annotator.box_label(box, gt_key, color=(255, 255, 0))
 
         # add pred bbox
         for txt_key, txt_value in txt_info.items():
             # plot# plot（xmin, ymin, xmax, ymax）
-            txt_value[:4, 0] = txt_value[:4, 0] * img_sz[1]
-            txt_value[:4, 1] = txt_value[:4, 1] * img_sz[0]
-            txt_value[:4, 2] = txt_value[:4, 2] * img_sz[1]
-            txt_value[:4, 3] = txt_value[:4, 3] * img_sz[0]
-            col1, col2, col3, col4 = txt_value[:, 0], txt_value[:, 1], txt_value[:, 2], txt_value[:, 3]
-            txt_value = torch.tensor(np.vstack((col2, col1, col4, col3, txt_value[:, 4]))).T
+            if torch.all(txt_value[:4] < 1):  # 反归一化
+                txt_value[:, 0] = txt_value[:, 0] * img_sz[0]
+                txt_value[:, 1] = txt_value[:, 1] * img_sz[1]
+                txt_value[:, 2] = txt_value[:, 2] * img_sz[0]
+                txt_value[:, 3] = txt_value[:, 3] * img_sz[1]
 
-            color = colors(txt_key)
             for j, box in enumerate(txt_value.tolist()):
                 cls = f"{txt_key} {str(box[4])}"
-                annotator.box_label(box, txt_key, color=color)
+                annotator.box_label(box, txt_key, color=(255, 255, 0))
 
         cv2.imwrite(os.path.join(self.save_img_path, filename), annotator.im)  # save

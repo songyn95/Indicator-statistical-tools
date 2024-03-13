@@ -5,12 +5,10 @@ import os
 import pkg_resources as pkg
 
 from utils.general import LOGGER, colorstr
-from utils.loggers.clearml.clearml_utils import ClearmlLogger
-from utils.loggers.wandb.wandb_utils import WandbLogger
 
 # from utils.plots import plot_images, plot_labels, plot_results
 
-LOGGERS = ("csv", "tb", "wandb", "clearml", "comet")  # *.csv, TensorBoard, Weights & Biases, ClearML
+LOGGERS = ("csv", "tb", "comet")  # *.csv, TensorBoard, Weights & Biases, ClearML
 RANK = int(os.getenv("RANK", -1))
 
 try:
@@ -18,26 +16,6 @@ try:
 except ImportError:
     SummaryWriter = lambda *args: None  # None = SummaryWriter(str)
 
-try:
-    import wandb
-
-    assert hasattr(wandb, "__version__")  # verify package import not local dir
-    if pkg.parse_version(wandb.__version__) >= pkg.parse_version("0.12.2") and RANK in {0, -1}:
-        try:
-            wandb_login_success = wandb.login(timeout=30)
-        except wandb.errors.UsageError:  # known non-TTY terminal issue
-            wandb_login_success = False
-        if not wandb_login_success:
-            wandb = None
-except (ImportError, AssertionError):
-    wandb = None
-
-try:
-    import clearml
-
-    assert hasattr(clearml, "__version__")  # verify package import not local dir
-except (ImportError, AssertionError):
-    clearml = None
 
 try:
     if RANK in {0, -1}:
@@ -54,8 +32,8 @@ except (ImportError, AssertionError):
 # csv统计结果表
 class Loggers:
     # Loggers class
-    def __init__(self, save_dir=None, opt=None, logger=None, include=LOGGERS):
-        self.save_dir = save_dir
+    def __init__(self, opt=None, logger=None, include=LOGGERS):
+        self.save_dir = opt.save_dir
         self.opt = opt
         self.logger = logger  # for printing results to console
         self.include = include
@@ -85,28 +63,6 @@ class Loggers:
             self.logger.info(f"{prefix}Start with 'tensorboard --logdir {s.parent}', view at http://localhost:6006/")
             self.tb = SummaryWriter(str(s))
 
-            # W&B
-            if wandb and "wandb" in self.include:
-                self.opt.hyp = self.hyp  # add hyperparameters
-                self.wandb = WandbLogger(self.opt)
-            else:
-                self.wandb = None
-
-            # ClearML
-            if clearml and "clearml" in self.include:
-                try:
-                    self.clearml = ClearmlLogger(self.opt, self.hyp)
-                except Exception:
-                    self.clearml = None
-                    prefix = colorstr("ClearML: ")
-                    LOGGER.warning(
-                        f"{prefix}WARNING ⚠️ ClearML is installed but not configured, skipping ClearML logging."
-                        f" See https://docs.ultralytics.com/yolov5/tutorials/clearml_logging_integration#readme"
-                    )
-
-            else:
-                self.clearml = None
-
             # Comet
             if comet_ml and "comet" in self.include:
                 if isinstance(self.opt.resume, str) and self.opt.resume.startswith("comet://"):
@@ -123,10 +79,6 @@ class Loggers:
     def remote_dataset(self):
         """Fetches dataset dictionary from remote logging services like ClearML, Weights & Biases, or Comet ML."""
         data_dict = None
-        if self.clearml:
-            data_dict = self.clearml.data_dict
-        if self.wandb:
-            data_dict = self.wandb.data_dict
         if self.comet_logger:
             data_dict = self.comet_logger.data_dict
 

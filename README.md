@@ -37,10 +37,10 @@
 - 本代码提供了以下示例：      
 
 - python .\main.py --Manually-annotate-dir ./test/gt --source-file .\test\pred.txt --conf-thres 0.25  --img-path .\test\images\   
-	- 默认循环1000, conf阈值 从0到1 每次0.001
-- python .\main.py --Manually-annotate-dir ./test/gt --source-file .\test\pred.txt --conf-thres 0.25  --img-path .\test\images\  --conf-thres-setting  
-	- 默认1次
 
+- python .\main.py --Manually-annotate-dir ./test/gt --source-file .\test\pred.txt --conf-thres 0.25  --img-path .\test\images\  --conf-thres-setting  
+
+- 参数解析如下：
   - Manually-annotate-dir: gt文件夹路径，以 xml格式
 
   - source-file： 算法检测结果
@@ -49,7 +49,7 @@
 
   - img-path： 图像路径
 
-  - conf-thres-setting: conf阈值 从0到1 划分为1000份，默认开启,; 命令行使用后conf使用默认值，只运行一次
+  - conf-thres-setting: conf 阈值 从0到1 划分为1000份，运行1000次，默认开启; 命令行使用后conf使用默认值0.25，只运行一次
 
   - save-csv-path: 保存conf阈值 从0到1 划分为1000份后的精度，召回率指标
   

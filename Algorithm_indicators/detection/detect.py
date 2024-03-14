@@ -12,6 +12,7 @@ class Detect:
     def __init__(self, opt):
         self.iou = opt.iou_thres
         self.conf = opt.conf_thres
+
         self.gt_nums = 0
         self.detect_nums = 0
         self.correct_detect_nums = 0
@@ -28,11 +29,7 @@ class Detect:
             # 类别以及bbox满足要求：
             # 1. 有gt对应的类别
             # 2. iou满足要求
-            self.gt_nums += gt_value.shape[0]
-
             for txt_key, txt_value in txt_info.items():
-                self.detect_nums += txt_value.shape[0]
-
                 if txt_key != gt_key:
                     continue
 
@@ -51,20 +48,19 @@ class Detect:
                 else:
                     matches = np.zeros((0, 3))
 
-                n = matches.shape[0] > 0
+                n = matches.shape[0]
                 LOGGER.info(f"match result:{matches}, nums:{matches.shape[0]}")
-
                 if txt_key == gt_key:  # 正确数量
                     self.correct_detect_nums += n
 
     def get_index(self, eps=1e-7):
 
-        pricision = "{:.4f}".format(self.correct_detect_nums / (self.detect_nums + eps))
+        precision = "{:.4f}".format(self.correct_detect_nums / (self.detect_nums + eps))
         recall = "{:.4f}".format(self.correct_detect_nums / (self.gt_nums + eps))
 
-        data = {"iou": self.iou, "Confidence": self.conf, "gt": self.gt_nums,
-                "detect": self.detect_nums, "correct": self.correct_detect_nums,
-                "pricision": pricision, "recall": recall}
+        data = {"iou": self.iou, "Confidence": self.conf, "correct": self.correct_detect_nums,
+                "gt": self.gt_nums, "detect": self.detect_nums, "precision": precision,
+                "recall": recall}
 
         LOGGER.info(
             f'all detect nums: {self.detect_nums},correct detect nums: {self.correct_detect_nums},'

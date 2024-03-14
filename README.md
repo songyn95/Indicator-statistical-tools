@@ -36,9 +36,9 @@
 
 - 本代码提供了以下示例：      
 
-- python .\main.py --Manually-annotate-dir ./test/gt --source-file .\test\pred.txt --conf-thres 0.25  --img-path .\test\images\   
+	- python .\main.py --Manually-annotate-dir ./test/gt --source-file .\test\pred.txt --conf-thres 0.25  --img-path .\test\images\   
 
-- python .\main.py --Manually-annotate-dir ./test/gt --source-file .\test\pred.txt --conf-thres 0.25  --img-path .\test\images\  --conf-thres-setting  
+	- python .\main.py --Manually-annotate-dir ./test/gt --source-file .\test\pred.txt --conf-thres 0.25  --img-path .\test\images\  --conf-thres-setting  
 
 - 参数解析如下：
   - Manually-annotate-dir: gt文件夹路径，以 xml格式

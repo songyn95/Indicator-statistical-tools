@@ -23,13 +23,13 @@ def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-file", type=str, default=ROOT / "result.txt", help="result file")
     parser.add_argument("--Manually-annotate-dir", type=str, default=ROOT / "gt", help="annotate dir")
-    parser.add_argument("--save-csv-path", type=str, default=ROOT / "result.csv",
+    parser.add_argument("--save-csv-path", type=str, default=ROOT / "result"/ "result.csv",
                         help="Statistical Results Table, Threshold 0-1")
     parser.add_argument("--conf-thres", type=float, default=0.001, help="confidence threshold")
     parser.add_argument("--iou-thres", type=float, default=0.6, help="NMS IoU threshold")
     parser.add_argument("--imgsz", "--img", "--img-size", type=int, default=1920, help="img size")
     parser.add_argument("--img-path", type=str, default=ROOT / 'test', help="img path")
-    parser.add_argument("--save-img-path", type=str, default=ROOT / 'save_pic', help=" save img path")
+    parser.add_argument("--save-img-path", type=str, default=ROOT / "result"/ 'save_pic', help=" save img path")
     parser.add_argument("--conf-thres-setting", action="store_false", help=" Threshold 0-1 interval 0.001")
     parser.add_argument("--save-dir", default=ROOT / 'exp', help="save to project/name")
 
@@ -48,23 +48,8 @@ def main(opt):
         '.\\') else opt.source_file
     opt.Manually_annotate_dir = opt.Manually_annotate_dir.replace(".\\", os.getcwd() + os.sep, 1) if str(
         opt.Manually_annotate_dir).startswith('.\\') else opt.Manually_annotate_dir
+
     # to global path
-
-
-    # 获取yaml 里面数据路径 output log日志打印/存储
-    include_loggers = list(LOGGERS)
-    loggers = Loggers(
-        opt=opt,
-        logger=LOGGER,
-        include=tuple(include_loggers),
-    )
-    # 数据处理，图片路径 将图片结果保存
-    # Register actions
-    # for k in methods(loggers):
-    #     register_action(k, callback=getattr(loggers, k))
-    # result_path = data_dict["result"]
-
-    data_dict = loggers.remote_dataset
     if opt.conf_thres_setting:
         for conf_thres in range(0, 1001, 1):
             i_conf_thres = conf_thres / 1000
@@ -78,10 +63,8 @@ def main(opt):
             for i, obj_info in enumerate(pbar):
                 # xml文件和txt进行对比
                 file_info.compare(obj_info)
-                # compare()
-            file_info.write_to_csv()
-            file_info.get_index()
-            file_info.plot_evolve()
+            file_info.get_result()
+
     else:
         # 初始化检测器
         file_info = HandleFile(opt)
@@ -91,10 +74,7 @@ def main(opt):
         for i, obj_info in enumerate(pbar):
             # xml文件和txt进行对比
             file_info.compare(obj_info)
-            # compare()
-        file_info.write_to_csv()
-        file_info.get_index()
-        file_info.plot_evolve()
+        file_info.get_result()
 
 
 if __name__ == '__main__':

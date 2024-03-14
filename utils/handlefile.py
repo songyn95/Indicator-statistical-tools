@@ -27,13 +27,10 @@ class HandleFile:
 
         self.file = opt.source_file
         self.fileinfo = self.readfile()
-        self.opt = opt
 
-        self.detect = Detect(self.opt)
-        self.recongnize = Recongnize(self.opt)
-        self.classify = Classify(self.opt)
-
-
+        self.detect = Detect(opt)
+        self.recongnize = Recongnize(opt)
+        self.classify = Classify(opt)
 
     def readfile(self):
         try:
@@ -45,9 +42,6 @@ class HandleFile:
 
         finally:
             return fileinfo
-
-    def write_img(self):
-        pass
 
     def compare(self, obj_info):
         filename = obj_info[0][0]  # 000001 filename
@@ -65,6 +59,8 @@ class HandleFile:
 
                 line_list = line.split()[1:]
                 assert not len(line_list) % 6, LOGGER.error(f"failed file data:{line}")
+                # 检测总数量
+                self.detect.detect_nums += len(line_list) // 6
 
                 # 处理line： filename class bbox conf:
                 # 00001.jpg, car, 0.1,0.1, 0.1, 0.1, 0.6 car, 0.1,0.1, 0.1, 0.1, 0.6
@@ -81,14 +77,16 @@ class HandleFile:
 
                 # xml: filename, labelname, bbox, difficult:
                 # 00001, [car,dog], [[0.1,0.1, 0.1, 0.1],[0.1,0.1, 0.1, 0.1]], [0,0]
+
                 obj_info[2] = obj_info[2].squeeze().tolist()  # 降维
                 for key, value in zip(obj_info[1], obj_info[2]):
                     class_xml[key].append(value)
 
                 class_xml = dict(class_xml)  # {"car":[[],[]]}
-
-                for xml_key in class_xml:
-                    class_xml[xml_key] = torch.Tensor(np.stack(class_xml[xml_key]).astype(np.float32))
+                for xml_key, xml_value in class_xml.items():
+                    # gt数量
+                    self.detect.gt_nums += len(xml_value)
+                    class_xml[xml_key] = torch.Tensor(np.stack(xml_value).astype(np.float32))
 
                 LOGGER.info(f"txt info:{class_txt}")
                 LOGGER.info(f"xml info:{class_xml}")
@@ -165,3 +163,7 @@ class HandleFile:
                 annotator.box_label(box, txt_key, color=(255, 255, 0))
 
         cv2.imwrite(os.path.join(self.save_img_path, filename), annotator.im)  # save
+
+    def get_result(self):
+        self.write_to_csv()
+        self.plot_evolve()

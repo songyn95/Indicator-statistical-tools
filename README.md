@@ -36,8 +36,10 @@
 
 - 本代码提供了以下示例：      
 
-- python .\main.py --Manually-annotate-dir ./test/gt --source-file .\test\pred.txt --conf-thres 0.25  --img-path .\test\images\   默认循环1000, conf阈值 从0到1 每次0.001
-- python .\main.py --Manually-annotate-dir ./test/gt --source-file .\test\pred.txt --conf-thres 0.25  --img-path .\test\images\  --conf-thres-setting  默认1次
+- python .\main.py --Manually-annotate-dir ./test/gt --source-file .\test\pred.txt --conf-thres 0.25  --img-path .\test\images\   
+	- 默认循环1000, conf阈值 从0到1 每次0.001
+- python .\main.py --Manually-annotate-dir ./test/gt --source-file .\test\pred.txt --conf-thres 0.25  --img-path .\test\images\  --conf-thres-setting  
+	- 默认1次
 
   - Manually-annotate-dir: gt文件夹路径，以 xml格式
 

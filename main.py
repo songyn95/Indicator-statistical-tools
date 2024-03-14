@@ -25,8 +25,8 @@ def parse_opt():
     parser.add_argument("--Manually-annotate-dir", type=str, default=ROOT / "gt", help="annotate dir")
     parser.add_argument("--save-csv-path", type=str, default=ROOT / "result.csv",
                         help="Statistical Results Table, Threshold 0-1")
-    parser.add_argument("--conf-thres", type=float, default=0.25, help="confidence threshold")
-    parser.add_argument("--iou-thres", type=float, default=0.45, help="NMS IoU threshold")
+    parser.add_argument("--conf-thres", type=float, default=0.001, help="confidence threshold")
+    parser.add_argument("--iou-thres", type=float, default=0.6, help="NMS IoU threshold")
     parser.add_argument("--imgsz", "--img", "--img-size", type=int, default=1920, help="img size")
     parser.add_argument("--img-path", type=str, default=ROOT / 'test', help="img path")
     parser.add_argument("--save-img-path", type=str, default=ROOT / 'save_pic', help=" save img path")

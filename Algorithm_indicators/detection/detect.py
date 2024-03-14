@@ -17,8 +17,6 @@ class Detect:
         self.correct_detect_nums = 0
 
     def compute_iou(self, box1, box2, eps=1e-7):
-        print(box1)
-        print(box2)
         (a1, a2), (b1, b2) = box1.unsqueeze(1).chunk(2, 2), box2.unsqueeze(0).chunk(2, 2)
         inter = (torch.min(a2, b2) - torch.max(a1, b1)).clamp(0).prod(2)
 
@@ -39,8 +37,6 @@ class Detect:
                     continue
 
                 txt_value = txt_value[txt_value[:, 4] > self.conf]
-                print(f"gt:{gt_value}")
-                print(f"txt:{txt_value}")
 
                 iou = self.compute_iou(gt_value, txt_value[:, :4])
                 x = torch.where(iou > self.iou)  # filter iou
@@ -58,7 +54,6 @@ class Detect:
                 n = matches.shape[0] > 0
                 LOGGER.info(f"match result:{matches}, nums:{matches.shape[0]}")
 
-                print(txt_key, gt_key)
                 if txt_key == gt_key:  # 正确数量
                     self.correct_detect_nums += n
 

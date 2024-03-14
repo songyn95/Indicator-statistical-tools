@@ -49,7 +49,8 @@ class Dataset:
         labelname = list()
         difficult = list()
 
-        filename = anno.find('path').text.strip().split(os.sep)[-1]  ## filename 000001.jpg
+        file = anno.find('path').text.strip()
+        filename = file.split('\\')[-1] ## filename 000001.jpg
 
         # 获取图像标签大小
         img_sz = [0, 0]  # width height

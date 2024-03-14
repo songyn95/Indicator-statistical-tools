@@ -98,6 +98,7 @@ class HandleFile:
                 break
         else:
             LOGGER.error(f"error No XML found for txt:{filename}{self.file}")
+            raise FileNotFoundError(f"{filename} or {self.file} does not exist")
 
         # IOU
         self.detect.compare_index(class_xml, class_txt)

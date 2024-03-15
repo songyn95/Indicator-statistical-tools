@@ -132,10 +132,9 @@ def plot_evolve(evolve_csv="result.csv"):
 
     Example: from utils.plots import *; plot_evolve()
     """
-    print(evolve_csv)
     evolve_csv = Path(evolve_csv)
-    data = pd.read_csv(evolve_csv)
-    keys = [x.strip() for x in data.columns]
+    df_data = pd.read_csv(evolve_csv, header=None)
+    data = df_data.sort_values(by=1)
     x = data.values[:, ]
     plt.figure(figsize=(10, 12), tight_layout=True)
     matplotlib.rc("font", **{"size": 8})

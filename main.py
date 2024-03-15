@@ -19,6 +19,7 @@ from utils.handlefile import HandleFile
 from utils.plot import plot_evolve
 from tqdm import tqdm
 import time
+import concurrent.futures
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # root directory
@@ -53,6 +54,8 @@ def main(opt):
     :return:
     """
     t1 = time.time()
+    k = 10
+    test_flag = 0
     ##abs path
     opt.source_file = opt.source_file.replace(".\\", os.getcwd() + os.sep, 1) if str(opt.source_file).startswith(
         '.\\') else opt.source_file
@@ -62,36 +65,57 @@ def main(opt):
     # evolve_csv = opt.save_csv_path
     # print(evolve_csv)
     # to global path
-    if opt.conf_thres_setting:
-        for conf_thres in range(0, 1001, 1):
-            i_conf_thres = conf_thres / 1000
-            opt.conf_thres = i_conf_thres
-            # 1. dataloader
+    if test_flag:
+        if opt.conf_thres_setting:
+            for conf_thres in range(k):
+                i_conf_thres = conf_thres / k
+                opt.conf_thres = i_conf_thres
+                # 1. dataloader
+                dataloader, dataset = create_dataloader(opt.Manually_annotate_dir)
+                LOGGER.info(f'dataloader sizes {len(dataloader)}')
+                pbar = tqdm(dataloader)
+                # 初始化检测器
+                file_info = HandleFile(opt)
+                for i, obj_info in enumerate(pbar):
+                    # xml文件和txt进行对比
+                    file_info.compare(obj_info)
+                file_info.write_csv()
+
+        else:
+            # 初始化检测器,只编译一次
+            file_info = HandleFile(opt)
             dataloader, dataset = create_dataloader(opt.Manually_annotate_dir)
             LOGGER.info(f'dataloader sizes {len(dataloader)}')
             pbar = tqdm(dataloader)
-            # 初始化检测器
-            file_info = HandleFile(opt)
             for i, obj_info in enumerate(pbar):
                 # xml文件和txt进行对比
                 file_info.compare(obj_info)
             file_info.write_csv()
 
     else:
-        # 初始化检测器,只编译一次
-        file_info = HandleFile(opt)
-        dataloader, dataset = create_dataloader(opt.Manually_annotate_dir)
-        LOGGER.info(f'dataloader sizes {len(dataloader)}')
-        pbar = tqdm(dataloader)
-        for i, obj_info in enumerate(pbar):
-            # xml文件和txt进行对比
-            file_info.compare(obj_info)
-        file_info.write_csv()
+        def create_task(conf_thres=None):
+            dataloader, dataset = create_dataloader(opt.Manually_annotate_dir)
+            LOGGER.info(f'dataloader sizes {len(dataloader)}')
+            pbar = tqdm(dataloader)
+            # 初始化检测器
+            file_info = HandleFile(opt)
+            if conf_thres:
+                file_info.set_conf(conf_thres)
+            for i, obj_info in enumerate(pbar):
+                file_info.compare(obj_info)
+            file_info.write_csv()
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # 提交任务到线程池执行
+            results = [executor.submit(create_task, i / k * 1.0) for i in range(k)]
+
+            # 获取并等待结果
+            for f in concurrent.futures.as_completed(results):
+                print(f.result())
 
     plot_evolve(opt.save_csv_path)
-
     t2 = time.time()
-    LOGGER.info(f'cost total time: {(t2 - t1) / 60.0} mins')
+    LOGGER.info(f'cost total time: {(t2 - t1) / 60.0} minutes')
 
 
 if __name__ == '__main__':

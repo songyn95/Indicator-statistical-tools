@@ -7,13 +7,9 @@ from Algorithm_indicators.recognition.recongnize import Recongnize
 from Algorithm_indicators.classification.classify import Classify
 import numpy as np
 import torch
-from utils.plot import Annotator, Colors
-import cv2
-import csv
-import pandas as pd
+from utils.plot import Annotator, Colors, plot_evolve, write_to_csv, plot_labels
+
 from pathlib import Path
-from matplotlib import pyplot as plt
-import matplotlib
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # root directory
@@ -92,7 +88,8 @@ class HandleFile:
                 LOGGER.info(f"xml info:{class_xml}")
 
                 # 写信息到图像
-                self.plot_labels(class_xml, class_txt, filename)
+                file = os.path.join(self.img_path, filename)
+                plot_labels(class_xml, class_txt, file, self.save_img_path)
                 break
         else:
             LOGGER.error(f"error No XML found for txt:{filename}{self.file}")
@@ -101,69 +98,7 @@ class HandleFile:
         # IOU
         self.detect.compare_index(class_xml, class_txt)
 
-    def get_index(self):
-        self.detect.get_index()
-
-    def write_to_csv(self):
-        """Writes json data for an image to a CSV file, appending if the file exists."""
+    def write_csv(self):
         data = self.detect.get_index()
-        with open(self.save_csv_path, mode="a", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=data.keys())
-            if not self.save_csv_path.is_file():
-                writer.writeheader()
-            writer.writerow(data)
+        write_to_csv(data, self.save_csv_path)
 
-    def plot_evolve(self):
-        """
-        Plots hyperparameter evolution results from a given CSV, saving the plot and displaying best results.
-
-        Example: from utils.plots import *; plot_evolve()
-        """
-        evolve_csv = Path(self.save_csv_path)
-        data = pd.read_csv(evolve_csv)
-        keys = [x.strip() for x in data.columns]
-        x = data.values[:, ]
-        plt.figure(figsize=(10, 12), tight_layout=True)
-        matplotlib.rc("font", **{"size": 8})
-
-        plt.plot(x[:, -2], x[:, -1])
-        plt.title(f"iou:(0-1) PR curves")
-        f = evolve_csv.with_suffix(".png")  # filename
-        plt.savefig(f, dpi=200)
-        plt.close()
-        print(f"Saved {f}")
-
-    def plot_labels(self, xml_info, txt_info, filename):
-        """Plots dataset labels, saving correlogram and label images, handles classes, and visualizes bounding boxes."""
-        colors = Colors()
-        img = os.path.join(self.img_path, filename)
-        img = cv2.imread(img)
-        annotator = Annotator(img)
-        # image width, height
-        height, width = img.shape[:2]
-        img_sz = [width, height]
-
-        # add true bbox
-        for gt_key, gt_value in xml_info.items():
-            # plot（xmin, ymin, xmax, ymax）
-            for j, box in enumerate(gt_value.tolist()):
-                annotator.box_label(box, gt_key, color=(255, 255, 0))
-
-        # add pred bbox
-        for txt_key, txt_value in txt_info.items():
-            # plot# plot（xmin, ymin, xmax, ymax）
-            if torch.all(txt_value[:4] < 1):  # 反归一化
-                txt_value[:, 0] = txt_value[:, 0] * img_sz[0]
-                txt_value[:, 1] = txt_value[:, 1] * img_sz[1]
-                txt_value[:, 2] = txt_value[:, 2] * img_sz[0]
-                txt_value[:, 3] = txt_value[:, 3] * img_sz[1]
-
-            for j, box in enumerate(txt_value.tolist()):
-                cls = f"{txt_key} {str(box[4])}"
-                annotator.box_label(box, txt_key, color=(255, 255, 0))
-
-        cv2.imwrite(os.path.join(self.save_img_path, filename), annotator.im)  # save
-
-    def get_result(self):
-        self.write_to_csv()
-        self.plot_evolve()

@@ -4,7 +4,6 @@ import os
 import numpy as np
 import torch
 from utils.general import LOGGER
-from utils.plot import Annotator, Colors
 
 
 ##检测框架，集合检测功能
@@ -37,7 +36,7 @@ class Detect:
 
                 iou = self.compute_iou(gt_value, txt_value[:, :4])
                 x = torch.where(iou > self.iou)  # filter iou
-                LOGGER.info(f"iou result: {iou}, shape:{iou.shape}")
+                # LOGGER.info(f"iou result: {iou}, shape:{iou.shape}")
                 if x[0].shape[0]:
                     matches = torch.cat((torch.stack(x, 1), iou[x[0], x[1]][:, None]), 1).cpu().numpy()
                     if x[0].shape[0] > 1:
@@ -49,7 +48,7 @@ class Detect:
                     matches = np.zeros((0, 3))
 
                 n = matches.shape[0]
-                LOGGER.info(f"match result:{matches}, nums:{matches.shape[0]}")
+                # LOGGER.info(f"match result:{matches}, nums:{matches.shape[0]}")
                 if txt_key == gt_key:  # 正确数量
                     self.correct_detect_nums += n
 

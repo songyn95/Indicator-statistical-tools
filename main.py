@@ -20,6 +20,9 @@ from utils.plot import plot_evolve
 from tqdm import tqdm
 import time
 import concurrent.futures
+import multiprocessing
+from concurrent.futures import ProcessPoolExecutor
+from multiprocessing import Process, Manager
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # root directory
@@ -28,7 +31,7 @@ if str(ROOT) not in sys.path:
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 
-def create_task(conf_thres=None):
+def create_task(opt, conf_thres=None):
     dataloader, dataset = create_dataloader(opt.Manually_annotate_dir)
     LOGGER.info(f'dataloader sizes {len(dataloader)}')
     pbar = tqdm(dataloader)
@@ -67,7 +70,7 @@ def main(opt):
     :return:
     """
     t1 = time.time()
-    k = 1000
+    k = 10
     test_flag = 0
 
     ##abs path
@@ -78,12 +81,29 @@ def main(opt):
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # 提交任务到线程池执行
-        results = [executor.submit(create_task, i / k * 1.0) for i in range(k)]
+        results = [executor.submit(create_task, opt, i / k * 1.0) for i in range(k)]
         # results = [executor.submit(create_task, 0.0) for i in range(k)]
 
         # 获取并等待结果
         for f in concurrent.futures.as_completed(results):
             print(f.result())
+
+    # with Manager() as manager:
+    #     d = manager.dict()
+    #     jobs = [Process(target=create_task, args=(opt, i / k * 1.0)) for i in range(k)]
+    #     for j in jobs:
+    #         j.start()
+    #     for j in jobs:
+    #         j.join()
+
+    # with multiprocessing.Pool(processes=k) as pool:
+    #     # 使用map函数并行执行任务
+    #
+    #     results = pool.map(create_task, [(opt, i / k * 1.0) for i in range(k)])
+    #
+    #     # 输出结果
+    #     # for result in results:
+    #     print(results)
 
     plot_evolve(opt.save_csv_path)
     t2 = time.time()

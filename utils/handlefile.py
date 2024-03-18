@@ -20,6 +20,8 @@ ROOT = FILE.parents[0]  # root directory
 
 
 class HandleFile:
+    img_list = []
+
     def __init__(self, opt):
         self.img_path = opt.img_path
         self.save_img_path = opt.save_img_path
@@ -33,7 +35,7 @@ class HandleFile:
         self.classify = Classify(opt)
 
     def set_conf(self, conf_thres=None):
-        if conf_thres:
+        if conf_thres is not None:
             self.detect.conf = conf_thres
 
     def readfile(self):
@@ -108,8 +110,10 @@ class HandleFile:
         LOGGER.info(f"xml info:{class_xml}")
 
         # 写信息到图像
-        file = os.path.join(self.img_path, filename)
-        plot_labels(class_xml, class_txt, file, self.save_img_path)
+        if filename not in HandleFile.img_list:
+            file = os.path.join(self.img_path, filename)
+            plot_labels(class_xml, class_txt, file, self.save_img_path)
+            HandleFile.img_list.append(filename)
 
         # IOU
         self.detect.compare_index(class_xml, class_txt)

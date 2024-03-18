@@ -14,6 +14,7 @@ import pandas as pd
 from pathlib import Path
 import torch
 
+
 class Colors:
     # Ultralytics color palette https://ultralytics.com/
     def __init__(self):
@@ -126,6 +127,7 @@ def write_to_csv(data, save_csv_path):
             writer.writeheader()
         writer.writerow(data)
 
+
 def plot_evolve(evolve_csv="result.csv"):
     """
     Plots hyperparameter evolution results from a given CSV, saving the plot and displaying best results.
@@ -146,16 +148,16 @@ def plot_evolve(evolve_csv="result.csv"):
     plt.close()
     print(f"Saved {f}")
 
+
 def plot_labels(xml_info, txt_info, filename, save_img_path):
     """Plots dataset labels, saving correlogram and label images, handles classes, and visualizes bounding boxes."""
-    colors = Colors()
+    # colors = Colors()
     img = filename
     img = cv2.imread(img)
     annotator = Annotator(img)
     # image width, height
     height, width = img.shape[:2]
     img_sz = [width, height]
-
     # add true bbox
     for gt_key, gt_value in xml_info.items():
         # plot（xmin, ymin, xmax, ymax）
@@ -174,5 +176,6 @@ def plot_labels(xml_info, txt_info, filename, save_img_path):
         for j, box in enumerate(txt_value.tolist()):
             cls = f"{txt_key} {str(box[4])}"
             annotator.box_label(box, txt_key, color=(255, 255, 0))
-
-    cv2.imwrite(os.path.join(save_img_path, filename), annotator.im)  # save
+    if not os.path.exists(save_img_path):
+        os.mkdir(save_img_path)
+    cv2.imwrite(os.path.join(save_img_path, filename.split(os.sep)[-1]), annotator.im)  # save

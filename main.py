@@ -28,6 +28,19 @@ if str(ROOT) not in sys.path:
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 
+def create_task(conf_thres=None):
+    dataloader, dataset = create_dataloader(opt.Manually_annotate_dir)
+    LOGGER.info(f'dataloader sizes {len(dataloader)}')
+    pbar = tqdm(dataloader)
+    # 初始化检测器
+    file_info = HandleFile(opt)
+    if conf_thres is not None:
+        file_info.set_conf(conf_thres)
+    for i, obj_info in enumerate(pbar):
+        file_info.compare(obj_info)
+    file_info.write_csv()
+
+
 def parse_opt():
     """解析参数"""
     parser = argparse.ArgumentParser()
@@ -54,64 +67,23 @@ def main(opt):
     :return:
     """
     t1 = time.time()
-    k = 10
+    k = 1000
     test_flag = 0
+
     ##abs path
     opt.source_file = opt.source_file.replace(".\\", os.getcwd() + os.sep, 1) if str(opt.source_file).startswith(
         '.\\') else opt.source_file
     opt.Manually_annotate_dir = opt.Manually_annotate_dir.replace(".\\", os.getcwd() + os.sep, 1) if str(
         opt.Manually_annotate_dir).startswith('.\\') else opt.Manually_annotate_dir
 
-    # evolve_csv = opt.save_csv_path
-    # print(evolve_csv)
-    # to global path
-    if test_flag:
-        if opt.conf_thres_setting:
-            for conf_thres in range(k):
-                i_conf_thres = conf_thres / k
-                opt.conf_thres = i_conf_thres
-                # 1. dataloader
-                dataloader, dataset = create_dataloader(opt.Manually_annotate_dir)
-                LOGGER.info(f'dataloader sizes {len(dataloader)}')
-                pbar = tqdm(dataloader)
-                # 初始化检测器
-                file_info = HandleFile(opt)
-                for i, obj_info in enumerate(pbar):
-                    # xml文件和txt进行对比
-                    file_info.compare(obj_info)
-                file_info.write_csv()
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # 提交任务到线程池执行
+        results = [executor.submit(create_task, i / k * 1.0) for i in range(k)]
+        # results = [executor.submit(create_task, 0.0) for i in range(k)]
 
-        else:
-            # 初始化检测器,只编译一次
-            file_info = HandleFile(opt)
-            dataloader, dataset = create_dataloader(opt.Manually_annotate_dir)
-            LOGGER.info(f'dataloader sizes {len(dataloader)}')
-            pbar = tqdm(dataloader)
-            for i, obj_info in enumerate(pbar):
-                # xml文件和txt进行对比
-                file_info.compare(obj_info)
-            file_info.write_csv()
-
-    else:
-        def create_task(conf_thres=None):
-            dataloader, dataset = create_dataloader(opt.Manually_annotate_dir)
-            LOGGER.info(f'dataloader sizes {len(dataloader)}')
-            pbar = tqdm(dataloader)
-            # 初始化检测器
-            file_info = HandleFile(opt)
-            if conf_thres:
-                file_info.set_conf(conf_thres)
-            for i, obj_info in enumerate(pbar):
-                file_info.compare(obj_info)
-            file_info.write_csv()
-
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            # 提交任务到线程池执行
-            results = [executor.submit(create_task, i / k * 1.0) for i in range(k)]
-
-            # 获取并等待结果
-            for f in concurrent.futures.as_completed(results):
-                print(f.result())
+        # 获取并等待结果
+        for f in concurrent.futures.as_completed(results):
+            print(f.result())
 
     plot_evolve(opt.save_csv_path)
     t2 = time.time()

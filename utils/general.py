@@ -106,8 +106,8 @@ def set_logging(name=LOGGING_NAME, verbose=True):
     )
 
 
-set_logging(LOGGING_NAME)  # run before defining LOGGER
-LOGGER = logging.getLogger(LOGGING_NAME)  # define globally (used in train.py, val.py, detection.py, etc.)
+set_logging(LOGGING_NAME)  # run      before defining LOGGER
+LOGGER = logging.getLogger(LOGGING_NAME)  # define globally (used in train.py, script_dataset.py, detection.py, etc.)
 
 
 class Profile(contextlib.ContextDecorator):

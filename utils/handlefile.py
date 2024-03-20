@@ -16,7 +16,7 @@ from utils.plot import write_to_csv, plot_labels
 from pathlib import Path
 
 FILE = Path(__file__).resolve()
-ROOT = FILE.parents[0]  # root directory
+ROOT = FILE.parents[1]  # root directory
 
 
 class HandleFile:
@@ -25,7 +25,8 @@ class HandleFile:
     def __init__(self, opt):
         self.img_path = opt.img_path
         self.save_img_path = opt.save_img_path
-        self.save_csv_path = opt.save_csv_path
+        self.save_csv_path = opt.save_csv_path  # save csv path
+        self.data_type = opt.data_type  # image or video
 
         self.file = opt.source_file
         self.fileinfo = self.readfile()
@@ -36,12 +37,12 @@ class HandleFile:
 
     def set_conf(self, conf_thres=None):
         if conf_thres is not None:
-            self.detect.conf = conf_thres
+            self.detect.set_conf(conf_thres)
 
     def readfile(self):
         data = []
         try:
-            with open(self.file, 'r') as f:
+            with open(self.file, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
                 for line in lines:
                     data.append(line.rstrip().split(' '))
@@ -55,68 +56,96 @@ class HandleFile:
         return data
 
     def compare(self, obj_info):
-        filename = obj_info[0][0]  # 000001 filename
-        obj_info[1] = [i[0] for i in obj_info[1]]  # class
+        # video： filename, frameid, labelname, obj_id, bbox
+        # image： filename, labelname, bbox
+        k = 2 if self.data_type == "video" else 1  # 前 1，2 个为数据名称信息
 
+        # 000001 filename
+        filename = obj_info[0][0]
+        # class
+        obj_info[k] = [j[0] for j in obj_info[k]]
+        frameid = obj_info[1].flatten()[0].item() if self.data_type == "video" else None
+        # 初始化类别信息
         class_txt = dict()
         class_xml = defaultdict(list)
+        # 匹配行
+        if self.data_type == "image":
+            matched_rows = self.fileinfo[self.fileinfo[0].str.contains(filename)].index.tolist()
+        else:
+            matched_rows = self.fileinfo[self.fileinfo.iloc[:, 1] == str(frameid)].index.tolist()
 
-        matched_rows = self.fileinfo[self.fileinfo[0].str.contains(filename)].index.tolist()
         LOGGER.info(f"match:{matched_rows}{type(matched_rows)}")
         if not matched_rows:
             LOGGER.error(f"error No XML found for txt:{filename}")
             raise FileNotFoundError(f"{filename} does not exist")
 
+        # 取行
         rows = matched_rows[0]
-
-        # 检测总数量
         fileinfo = self.fileinfo[rows:rows + 1].dropna(axis=1)
         size = fileinfo.size
-        assert not (size - 1) % 6, LOGGER.error(f"failed file data:{fileinfo}")
 
-        class_txt.clear()
-        class_xml.clear()
+        data_len = size - 2 if self.data_type == "video" else size - 1
+        interval = 7 if self.data_type == "video" else 6
+        LOGGER.info(f"data_len:{data_len}, interval: {interval}")
+        assert not data_len % interval, LOGGER.error(f"failed file data:{fileinfo}")
 
-        data_len = (size - 1) // 6
-        self.detect.detect_nums += data_len
-        class_info = fileinfo.iloc[:, 1:]
-        # 处理line： filename class bbox conf:
-        # 00001.jpg, car, 0.1,0.1, 0.1, 0.1, 0.6 car, 0.1,0.1, 0.1, 0.1, 0.6
-        for j in range(0, size - 1, 6):
-            key = class_info.iloc[0, j]
-            img_info = class_info.iloc[:, j + 1:j + 6].values.astype('float').flatten()
-            if key and key not in class_txt:
-                class_txt[key] = [img_info]
-            else:
-                class_txt[key] += [img_info]
+        # 过滤出的行
+        class_info = fileinfo.iloc[:, k:]
 
-        # tensor
-        for txt_key in class_txt:
-            class_txt[txt_key] = torch.Tensor(np.stack(class_txt[txt_key]).astype(np.float32))
+        if self.data_type == "image":
+            # txt
+            for j in range(0, data_len, interval):
+                key = (class_info.iloc[0, j],)  # (class, id)
+                img_info = class_info.iloc[:, j + 1:j + interval].values.astype('float').flatten()
+                if key and key not in class_txt:
+                    class_txt[key] = [img_info]
+                else:
+                    class_txt[key] += [img_info]
+            # xml
+            obj_info[k + 1] = obj_info[k + 1].squeeze().tolist()  # 降维
+            for key, value in zip(obj_info[k], obj_info[k + 1]):
+                class_xml[(key,)].append(value)
 
-        # xml handle: filename, labelname, bbox, difficult:
-        # 00001, [car,dog], [[0.1,0.1, 0.1, 0.1],[0.1,0.1, 0.1, 0.1]], [0,0]
-        obj_info[2] = obj_info[2].squeeze().tolist()  # 降维
-        for key, value in zip(obj_info[1], obj_info[2]):
-            class_xml[key].append(value)
+        else:  # video
+            # txt
+            for j in range(0, data_len, interval):
+                key = (class_info.iloc[0, j], int(class_info.iloc[0, j + 1]))  # (class, id)
+                img_info = class_info.iloc[:, j + 2:j + interval].values.astype('float').flatten()
+                if key and key not in class_txt:
+                    class_txt[key] = [img_info]
+                else:
+                    class_txt[key] += [img_info]
+            # xml
+            obj_info[k + 1] = obj_info[k + 1].flatten().tolist()  # id降维
+            obj_info[k + 2] = obj_info[k + 2].squeeze().tolist()  # bbox降维
+            for key, value1, value2 in zip(obj_info[k], obj_info[k + 1], obj_info[k + 2]):
+                class_xml[(key, value1)].append(value2)
 
-        class_xml = dict(class_xml)  # {"car":[[],[]]}
+        class_xml = dict(class_xml)
         for xml_key, xml_value in class_xml.items():
-            # gt数量
+            # 总gt数量
             self.detect.gt_nums += len(xml_value)
             class_xml[xml_key] = torch.Tensor(np.stack(xml_value).astype(np.float32))
 
-        LOGGER.info(f"txt info:{class_txt}")
-        LOGGER.info(f"xml info:{class_xml}")
+            # tensor
+        for txt_key, txt_value in class_txt.items():
+            # 总检测数据量
+            self.detect.detect_nums += len(txt_value)
+            class_txt[txt_key] = torch.Tensor(np.stack(txt_value).astype(np.float32))
 
+        # LOGGER.info(f"txt info:{class_txt}")
+        # LOGGER.info(f"xml info:{class_xml}")
         # 写信息到图像
-        if filename not in HandleFile.img_list:
-            file = os.path.join(self.img_path, filename)
-            plot_labels(class_xml, class_txt, file, self.save_img_path)
-            HandleFile.img_list.append(filename)
+        if self.data_type == "image":
+            if filename not in HandleFile.img_list:
+                file = Path(self.img_path) / filename
+                if not file.is_absolute():
+                    file = (ROOT / file).resolve()
+                plot_labels(class_xml, class_txt, str(file), self.save_img_path, self.data_type)
+                HandleFile.img_list.append(filename)
 
         # IOU
-        self.detect.compare_index(class_xml, class_txt)
+        self.detect.compare_index(class_xml, class_txt, frameid)
 
     def write_csv(self):
         data = self.detect.get_index()

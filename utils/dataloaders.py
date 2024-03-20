@@ -10,22 +10,23 @@ from utils.general import LOGGER
 from torch.utils.data import dataloader
 
 
-def create_dataloader(path, batch=1):
-    LOGGER.info(f'GT dataloader path: {path}\tbatch_size: {batch} ')
-    dataset = Dataset(path, batch)
+def create_dataloader(opt, batch=1):
+    dataset = Dataset(opt, batch)
     loader = InfiniteDataLoader(dataset, batch)
     return loader, dataset
 
 
 class Dataset:
-    def __init__(self, path, batch_size=1):
-        self.path = path
+    def __init__(self, opt, batch_size=1):
+        self.path = opt.Manually_annotate_dir
+        self.data_type = opt.data_type
+        self.batch_size = batch_size
 
         ## xml文件
         try:
             f = []  # xml files
-            for p in path if isinstance(path, list) else [path]:
-                p = Path(p)  # os-agnostic
+            for p in self.path if isinstance(self.path, list) else [self.path]:
+                p = Path(p)
                 if p.is_dir():  # dir
                     f += glob.glob(str(p / "**" / "*.xml"), recursive=True)
                 elif p.is_file() and p.name.endswith('.xml'):  # file
@@ -38,41 +39,47 @@ class Dataset:
             assert self.im_files, f"No xml file found"
 
         except Exception as e:
-            raise Exception(f"Error loading data from {path}:") from e
+            raise Exception(f"Error loading data from {self.path}:") from e
+        LOGGER.info(f'GT dataloader path: {self.path}\tbatch_size: {self.batch_size} ')
 
     def __getitem__(self, index):
-        # 逐个获取xml文件
         id_ = self.im_files[index]
-        anno = ET.parse(id_)
+        try:  # utf-8
+            anno = ET.parse(id_)
+        except:  # gb2312
+            eachfile = open(id_, encoding='GB2312')
+            anno = ET.parse(eachfile).getroot()
 
         bbox = list()
         labelname = list()
-        difficult = list()
+        frameid = list()
+        obj_id = list()
 
-        file = anno.find('path').text.strip()
-        filename = file.split('\\')[-1] ## filename 000001.jpg
-
-        # 获取图像标签大小
-        img_sz = [0, 0]  # width height
-        for img_info in anno.findall('size'):
-            img_sz[0] = int(img_info.find('width').text)
-            img_sz[1] = int(img_info.find('height').text)
+        filename = anno.find('path').text.strip().split('\\')[-1]  ## filename 000001.jpg or 000001.mp4
+        if self.data_type == 'video':
+            frameid.append(anno.find('framenumber').text)
 
         for obj in anno.findall('object'):
-            if int(obj.find('difficult').text) == 1:  # 0表示易识别，1表示难识别
-                continue
+            if self.data_type == 'video':
+                obj_id.append(int(obj.find('id').text))
 
-            difficult.append(int(obj.find('difficult').text))
             bndbox_anno = obj.find('bndbox')
-            # bbox.append([float(bndbox_anno.find(tag).text) / img_sz[1] if tag in ['ymin', 'ymax'] else float(
-            #     bndbox_anno.find(tag).text) / img_sz[0] for tag in ('xmin', 'ymin', 'xmax', 'ymax')])
-            bbox.append([int(bndbox_anno.find(tag).text) for tag in ('xmin', 'ymin', 'xmax', 'ymax')])
+            try:  # image
+                bbox.append([int(bndbox_anno.find(tag).text) for tag in ('xmin', 'ymin', 'xmax', 'ymax')])
+            except:  # video to x1，y1,x2，y2
+                obj_box = [int(bndbox_anno.find(tag).text) for tag in ('xmin', 'ymin', 'width', 'height')]
+                obj_box[-2] += obj_box[0]
+                obj_box[-1] += obj_box[1]
+                bbox.append(obj_box)
             labelname.append(obj.find('name').text.strip())
 
-        bbox = np.stack(bbox).astype(np.float32)  ##boundingbox
-        # label = np.stack(label).astype(np.int32)  #标签读取，需要
-        difficult = np.array(difficult, dtype=bool).astype(np.uint8)
-        return filename, labelname, bbox, difficult
+        bbox = np.stack(bbox).astype(np.int32)  ##boundingbox
+        if self.data_type == 'video':
+            frameid = np.stack(frameid).astype(np.uint8)  ##frameid
+            obj_id = np.stack(obj_id).astype(np.uint8)  ##obj_id
+
+            return filename, frameid, labelname, obj_id, bbox
+        return filename, labelname, bbox
 
     def __len__(self):
         return len(self.im_files)

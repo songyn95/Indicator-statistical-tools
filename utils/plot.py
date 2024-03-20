@@ -13,7 +13,7 @@ import csv
 import pandas as pd
 from pathlib import Path
 import torch
-
+from utils.loggers import LOGGER
 
 class Colors:
     # Ultralytics color palette https://ultralytics.com/
@@ -149,7 +149,7 @@ def plot_evolve(evolve_csv="result.csv"):
     print(f"Saved {f}")
 
 
-def plot_labels(xml_info, txt_info, filename, save_img_path):
+def plot_labels(xml_info, txt_info, filename, save_img_path, data_type="image"):
     """Plots dataset labels, saving correlogram and label images, handles classes, and visualizes bounding boxes."""
     # colors = Colors()
     img = filename
@@ -159,23 +159,24 @@ def plot_labels(xml_info, txt_info, filename, save_img_path):
     height, width = img.shape[:2]
     img_sz = [width, height]
     # add true bbox
+
     for gt_key, gt_value in xml_info.items():
         # plot（xmin, ymin, xmax, ymax）
         for j, box in enumerate(gt_value.tolist()):
-            annotator.box_label(box, gt_key, color=(255, 255, 0))
+            annotator.box_label(box, str(gt_key), color=(255, 255, 0))
 
     # add pred bbox
     for txt_key, txt_value in txt_info.items():
         # plot# plot（xmin, ymin, xmax, ymax）
-        if torch.all(txt_value[:4] < 1):  # 反归一化
+        if torch.all(txt_value[:4] < 1): # 反归一化
             txt_value[:, 0] = txt_value[:, 0] * img_sz[0]
             txt_value[:, 1] = txt_value[:, 1] * img_sz[1]
             txt_value[:, 2] = txt_value[:, 2] * img_sz[0]
             txt_value[:, 3] = txt_value[:, 3] * img_sz[1]
 
         for j, box in enumerate(txt_value.tolist()):
-            cls = f"{txt_key} {str(box[4])}"
-            annotator.box_label(box, txt_key, color=(255, 255, 0))
+            annotator.box_label(box, str(txt_key), color=(255, 255, 0))
+
     if not os.path.exists(save_img_path):
         os.mkdir(save_img_path)
     cv2.imwrite(os.path.join(save_img_path, filename.split(os.sep)[-1]), annotator.im)  # save

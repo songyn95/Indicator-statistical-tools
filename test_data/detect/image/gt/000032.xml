@@ -1,0 +1,38 @@
+<annotation>
+	<folder>images</folder>
+	<filename>000032.jpg</filename>
+	<path>F:\00 测试集合\02 机动车\北京\images_labeled\images\000032.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>2560</width>
+		<height>1440</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>suv</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>1234</xmin>
+			<ymin>289</ymin>
+			<xmax>1667</xmax>
+			<ymax>627</ymax>
+		</bndbox>
+	</object>
+	<object>
+		<name>sedan</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>63</xmin>
+			<ymin>432</ymin>
+			<xmax>652</xmax>
+			<ymax>720</ymax>
+		</bndbox>
+	</object>
+</annotation>

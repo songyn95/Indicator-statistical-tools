@@ -1,4 +1,12 @@
 # coding=utf-8
+"""
+@project:   blueberry
+@File:      general.py
+@IDE:
+@author:    song yanan
+@Date:  2024/3/13 16:10
+
+"""
 from pathlib import Path
 import os
 import logging

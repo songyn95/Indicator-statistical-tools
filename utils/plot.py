@@ -1,5 +1,12 @@
-# date:2024/3/7 19:20
-# author:HUAWEI
+# coding=utf-8
+"""
+@project:   blueberry
+@File:      plot.py
+@IDE:
+@author:    song yanan
+@Date:  2024/3/14 22:48
+
+"""
 
 from PIL import Image, ImageDraw
 from utils.general import is_ascii
@@ -64,7 +71,6 @@ colors = Colors()  # create instance for 'from utils.plots import colors'
 
 class Annotator:
 
-    # YOLOv5 Annotator for train/val mosaics and jpgs and detect/hub inference annotations
     def __init__(self, im, line_width=None, font_size=None, font='Arial.ttf', pil=False, example='abc'):
         # assert im.data.contiguous, 'Image not contiguous. Apply np.ascontiguousarray(im) to Annotator() input images.'
         # self.pil = pil or not is_ascii(example) or is_chinese(example)
@@ -146,7 +152,6 @@ def plot_evolve(evolve_csv="result.csv"):
     plt.savefig(f, dpi=200)
     plt.close()
     print(f"Saved {f}")
-    return f
 
 
 def plot_labels(xml_info, txt_info, filename, save_img_path, data_type="images", tb=None):

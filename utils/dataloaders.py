@@ -64,7 +64,7 @@ class Dataset:
                 obj_id.append(int(obj.find('id').text))
 
             bndbox_anno = obj.find('bndbox')
-            try:  # image
+            try:  # images
                 bbox.append([int(bndbox_anno.find(tag).text) for tag in ('xmin', 'ymin', 'xmax', 'ymax')])
             except:  # video to x1，y1,x2，y2
                 obj_box = [int(bndbox_anno.find(tag).text) for tag in ('xmin', 'ymin', 'width', 'height')]

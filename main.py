@@ -12,11 +12,9 @@ import sys
 import argparse
 import os
 
-from utils.general import print_args
-from utils.loggers import LOGGER
+from utils.general import print_args, LOGGER
 from utils.dataloaders import create_dataloader
 from utils.handlefile import HandleFile
-from utils.plot import plot_evolve
 from tqdm import tqdm
 import time
 import concurrent.futures
@@ -48,13 +46,16 @@ def parse_opt():
     parser.add_argument("--Manually-annotate-dir", type=str, default=ROOT / "gt", help="annotate dir")
     parser.add_argument("--save-csv-path", type=str, default=ROOT / "result" / "result.csv",
                         help="Statistical Results Table, Threshold 0-1")
-    parser.add_argument("--data_type", default="image", help="image or video")
+    parser.add_argument("--data_type", default="images", help="images or video")
     parser.add_argument("--conf-thres", type=float, default=0.001, help="confidence threshold")
     parser.add_argument("--iou-thres", type=float, default=0.6, help="NMS IoU threshold")
     parser.add_argument("--imgsz", "--img", "--img-size", type=int, default=1920, help="img size")
-    parser.add_argument("--img-path", type=str, default=ROOT / 'test_data', help="img path")
-    parser.add_argument("--save-img-path", type=str, default=ROOT / "result" / 'save_pic', help=" save img path")
-    parser.add_argument("--save-dir", default=ROOT / 'exp', help="save to project/name")
+    parser.add_argument("--data-path", type=str, default=ROOT / 'test_data' / 'image' / 'images',
+                        help="img or video data path")
+    parser.add_argument("--save-data-path", type=str, default=ROOT / "result" / 'save_pic',
+                        help=" save img or video path")
+    parser.add_argument("--save-dir", default=ROOT / 'result/tensorboard_dirs', help="save to project/name")
+    parser.add_argument("--tensorboard", action="store_true", help="view at web ")
 
     opt = parser.parse_args()
     print_args(vars(opt))
@@ -67,7 +68,7 @@ def main(opt):
     :return:
     """
     t1 = time.time()
-    k = 1000
+    k = 1
     ##abs path
     opt.source_file = opt.source_file.replace(".\\", os.getcwd() + os.sep, 1) if str(opt.source_file).startswith(
         '.\\') else opt.source_file
@@ -83,7 +84,7 @@ def main(opt):
         for f in concurrent.futures.as_completed(results):
             print(f.result())
 
-    plot_evolve(opt.save_csv_path)
+    HandleFile.plot_evolve(opt)
     t2 = time.time()
     LOGGER.info(f'cost total time: {(t2 - t1) / 60.0} minutes')
 

@@ -2,7 +2,6 @@
 # author:HUAWEI
 
 from PIL import Image, ImageDraw
-import cv2
 from utils.general import is_ascii
 import numpy as np
 import os
@@ -13,7 +12,7 @@ import csv
 import pandas as pd
 from pathlib import Path
 import torch
-from utils.loggers import LOGGER
+
 
 class Colors:
     # Ultralytics color palette https://ultralytics.com/
@@ -81,7 +80,7 @@ class Annotator:
         self.lw = 1  # line width
 
     def box_label(self, box, label='', color=(128, 128, 128), txt_color=(255, 255, 255)):
-        # Add one xyxy box to image with label
+        # Add one xyxy box to images with label
         if self.pil or not is_ascii(label):
             self.draw.rectangle(box, width=self.lw, outline=color)  # box
             if label:
@@ -106,21 +105,21 @@ class Annotator:
                             thickness=tf, lineType=cv2.LINE_AA)
 
     def rectangle(self, xy, fill=None, outline=None, width=1):
-        # Add rectangle to image (PIL-only)
+        # Add rectangle to images (PIL-only)
         self.draw.rectangle(xy, fill, outline, width)
 
     def text(self, xy, text, txt_color=(255, 255, 255)):
-        # Add text to image (PIL-only)
+        # Add text to images (PIL-only)
         w, h = self.font.getsize(text)  # text width, height
         self.draw.text((xy[0], xy[1] - h + 1), text, fill=txt_color, font=self.font)
 
     def result(self):
-        # Return annotated image as array
+        # Return annotated images as array
         return np.asarray(self.im)
 
 
 def write_to_csv(data, save_csv_path):
-    """Writes json data for an image to a CSV file, appending if the file exists."""
+    """Writes json data for an images to a CSV file, appending if the file exists."""
     with open(save_csv_path, mode="a", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=data.keys())
         if not save_csv_path.is_file():
@@ -147,36 +146,41 @@ def plot_evolve(evolve_csv="result.csv"):
     plt.savefig(f, dpi=200)
     plt.close()
     print(f"Saved {f}")
+    return f
 
 
-def plot_labels(xml_info, txt_info, filename, save_img_path, data_type="image"):
+def plot_labels(xml_info, txt_info, filename, save_img_path, data_type="images", tb=None):
     """Plots dataset labels, saving correlogram and label images, handles classes, and visualizes bounding boxes."""
     # colors = Colors()
     img = filename
     img = cv2.imread(img)
     annotator = Annotator(img)
-    # image width, height
+    # images width, height
     height, width = img.shape[:2]
     img_sz = [width, height]
     # add true bbox
 
     for gt_key, gt_value in xml_info.items():
-        # plot（xmin, ymin, xmax, ymax）
+        # (xmin, ymin, xmax, ymax)
         for j, box in enumerate(gt_value.tolist()):
-            annotator.box_label(box, str(gt_key), color=(255, 255, 0))
+            annotator.box_label(box, str(gt_key), color=(255, 0, 0))
 
     # add pred bbox
     for txt_key, txt_value in txt_info.items():
         # plot# plot（xmin, ymin, xmax, ymax）
-        if torch.all(txt_value[:4] < 1): # 反归一化
+        if torch.all(txt_value[:4] < 1):  # 反归一化
             txt_value[:, 0] = txt_value[:, 0] * img_sz[0]
             txt_value[:, 1] = txt_value[:, 1] * img_sz[1]
             txt_value[:, 2] = txt_value[:, 2] * img_sz[0]
             txt_value[:, 3] = txt_value[:, 3] * img_sz[1]
 
         for j, box in enumerate(txt_value.tolist()):
-            annotator.box_label(box, str(txt_key), color=(255, 255, 0))
+            annotator.box_label(box, str(txt_key), color=(0, 0, 255))
 
     if not os.path.exists(save_img_path):
         os.mkdir(save_img_path)
-    cv2.imwrite(os.path.join(save_img_path, filename.split(os.sep)[-1]), annotator.im)  # save
+    file = os.path.join(save_img_path, filename.split(os.sep)[-1])
+    cv2.imwrite(file, annotator.im)  # save
+
+    if tb:
+        tb.add_image(Path(file).stem, cv2.imread(str(file))[..., ::-1], dataformats="HWC")

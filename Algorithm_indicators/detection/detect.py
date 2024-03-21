@@ -1,4 +1,12 @@
 # coding=utf-8
+"""
+@project:   blueberry
+@File:      detect.py
+@IDE:
+@author:    song yanan
+@Date:  2024/3/15 23:34
+
+"""
 import os
 
 import numpy as np
@@ -103,8 +111,8 @@ class Detect:
 
             data = {"iou": self.iou, "Confidence": self.conf, "detect": self.detect_capture_nums,
                     "gt": self.gt_capture_nums, "correct": self.correct_capture_nums,
-                    "capture_precision": capture_precision, "capture_recall": capture_recall,
-                    "capture_repetition": capture_repetition}
+                    "capture_repetition": capture_repetition, "capture_precision": capture_precision,
+                    "capture_recall": capture_recall}
 
             LOGGER.info(
                 f'all gt capture nums:{colorstr(self.gt_capture_nums)}, all capture nums:'

@@ -1,4 +1,12 @@
 # coding=utf-8
+"""
+@project:   blueberry
+@File:      handlefile.py
+@IDE:
+@author:    song yanan
+@Date:  2024/3/13 22:59
+
+"""
 import functools
 import os
 

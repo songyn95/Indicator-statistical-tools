@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 @project:   blueberry
-@File:  script_dataset.py
+@File:      main.py
 @IDE:
 @author:    song yanan
 @Date:  2024/3/13 20:04
@@ -68,7 +68,7 @@ def main(opt):
     :return:
     """
     t1 = time.time()
-    k = 1
+    k = 1000
     ##abs path
     opt.source_file = opt.source_file.replace(".\\", os.getcwd() + os.sep, 1) if str(opt.source_file).startswith(
         '.\\') else opt.source_file

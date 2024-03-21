@@ -3,17 +3,20 @@ import functools
 import os
 
 import pandas as pd
+from pathlib import Path
+from collections import defaultdict
+import numpy as np
+import torch
+from torch.utils.tensorboard import SummaryWriter
+import cv2
 
 from utils.general import LOGGER
-from collections import defaultdict
 from Algorithm_indicators.detection.detect import Detect
 from Algorithm_indicators.recognition.recongnize import Recongnize
 from Algorithm_indicators.classification.classify import Classify
-import numpy as np
-import torch
 from utils.plot import write_to_csv, plot_labels
-
-from pathlib import Path
+from utils.general import colorstr
+from utils.plot import plot_evolve
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[1]  # root directory
@@ -23,13 +26,22 @@ class HandleFile:
     img_list = []
 
     def __init__(self, opt):
-        self.img_path = opt.img_path
-        self.save_img_path = opt.save_img_path
+        self.data_path = opt.data_path
+        self.save_path = opt.save_data_path
         self.save_csv_path = opt.save_csv_path  # save csv path
-        self.data_type = opt.data_type  # image or video
+        self.data_type = opt.data_type  # images or video
+        # TensorBoard
+        self.save_dir = opt.save_dir
+        self.tb = None
+        if opt.tensorboard:
+            prefix = colorstr("TensorBoard: ")
+            LOGGER.info(
+                f"{prefix}Start with 'tensorboard --logdir {self.save_dir.parent}', view at http://localhost:6006/")
+
+            self.tb = SummaryWriter(str(self.save_dir))
 
         self.file = opt.source_file
-        self.fileinfo = self.readfile()
+        self.fileinfo, self.file_lines = self.readfile()
 
         self.detect = Detect(opt)
         self.recongnize = Recongnize(opt)
@@ -46,18 +58,17 @@ class HandleFile:
                 lines = f.readlines()
                 for line in lines:
                     data.append(line.rstrip().split(' '))
-
             data = pd.DataFrame(data)
 
         except Exception as e:
             LOGGER.error(f"open file failed, error message:{e}")
             raise FileExistsError(f"{self.file} open failed!!")
 
-        return data
+        return data, len(lines)
 
     def compare(self, obj_info):
         # video： filename, frameid, labelname, obj_id, bbox
-        # image： filename, labelname, bbox
+        # images： filename, labelname, bbox
         k = 2 if self.data_type == "video" else 1  # 前 1，2 个为数据名称信息
 
         # 000001 filename
@@ -69,12 +80,12 @@ class HandleFile:
         class_txt = dict()
         class_xml = defaultdict(list)
         # 匹配行
-        if self.data_type == "image":
+        if self.data_type == "images":
             matched_rows = self.fileinfo[self.fileinfo[0].str.contains(filename)].index.tolist()
         else:
             matched_rows = self.fileinfo[self.fileinfo.iloc[:, 1] == str(frameid)].index.tolist()
 
-        LOGGER.info(f"match:{matched_rows}{type(matched_rows)}")
+        # LOGGER.info(f"match:{matched_rows}{type(matched_rows)}")
         if not matched_rows:
             LOGGER.error(f"error No XML found for txt:{filename}")
             raise FileNotFoundError(f"{filename} does not exist")
@@ -86,13 +97,13 @@ class HandleFile:
 
         data_len = size - 2 if self.data_type == "video" else size - 1
         interval = 7 if self.data_type == "video" else 6
-        LOGGER.info(f"data_len:{data_len}, interval: {interval}")
+        # LOGGER.info(f"data_len:{data_len}, interval: {interval}")
         assert not data_len % interval, LOGGER.error(f"failed file data:{fileinfo}")
 
         # 过滤出的行
         class_info = fileinfo.iloc[:, k:]
 
-        if self.data_type == "image":
+        if self.data_type == "images":
             # txt
             for j in range(0, data_len, interval):
                 key = (class_info.iloc[0, j],)  # (class, id)
@@ -135,14 +146,26 @@ class HandleFile:
 
         # LOGGER.info(f"txt info:{class_txt}")
         # LOGGER.info(f"xml info:{class_xml}")
-        # 写信息到图像
-        if self.data_type == "image":
+        if self.data_type == "images":  # 图像名命名
             if filename not in HandleFile.img_list:
-                file = Path(self.img_path) / filename
+                HandleFile.img_list.append(filename)
+                file = Path(self.data_path) / filename
                 if not file.is_absolute():
                     file = (ROOT / file).resolve()
-                plot_labels(class_xml, class_txt, str(file), self.save_img_path, self.data_type)
-                HandleFile.img_list.append(filename)
+                plot_labels(class_xml, class_txt, str(file), self.save_path, self.data_type, self.tb)
+
+                if self.file_lines == len(HandleFile.img_list) and self.tb:
+                    self.tb.close()
+        else:  # video 以帧号命名的图像
+            if frameid not in HandleFile.img_list:
+                HandleFile.img_list.append(frameid)
+                file = Path(self.data_path) / (str(frameid) + '.jpg')
+                if not file.is_absolute():
+                    file = (ROOT / file).resolve()
+                plot_labels(class_xml, class_txt, str(file), self.save_path, self.data_type, self.tb)
+
+                if self.file_lines == len(HandleFile.img_list) and self.tb:
+                    self.tb.close()
 
         # IOU
         self.detect.compare_index(class_xml, class_txt, frameid)
@@ -150,3 +173,14 @@ class HandleFile:
     def write_csv(self):
         data = self.detect.get_index()
         write_to_csv(data, self.save_csv_path)
+
+    @staticmethod
+    def plot_evolve(opt):
+        evolve_csv = opt.save_csv_path
+        plot_evolve(evolve_csv)
+        # add image
+        file = evolve_csv.with_suffix(".png")
+        if opt.tensorboard:
+            tb = SummaryWriter(str(opt.save_dir))
+            tb.add_image('0_' + Path(file).stem, cv2.imread(str(file))[..., ::-1], dataformats="HWC")
+            tb.close()

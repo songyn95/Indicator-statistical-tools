@@ -3,40 +3,21 @@ from pathlib import Path
 import os
 import logging
 import logging.config
-import platform
 import torch
 import numpy as np
 import contextlib
 import time
 import inspect
-import sys
 import glob
-import cv2
-import torchvision
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[1]  # root directory
 
-LOGGING_NAME = "log"
-LOGGERS = ("csv", "tb", "wandb", "clearml", "comet")  # *.csv, TensorBoard, Weights & Biases, ClearML
-
-
-def register_action(self, hook, name="", callback=None):
-    """
-    Register a new action to a callback hook.
-
-    Args:
-        hook: The callback hook name to register the action to
-        name: The name of the action for later reference
-        callback: The callback to fire
-    """
-    assert hook in self._callbacks, f"hook '{hook}' not found in callbacks {self._callbacks}"
-    assert callable(callback), f"callback '{callback}' is not callable"
-    self._callbacks[hook].append({"name": name, "callback": callback})
+LOGGING_NAME = "blueberry"
 
 
 def is_ascii(s=""):
-    """Checks if input string `s` contains only ASCII characters; returns `True` if so, otherwise `False`."""
+    # Is string composed of all ASCII (no UTF) characters? (note str().isascii() introduced in python 3.7)
     s = str(s)  # convert list, tuple, None, etc. to str
     return len(s.encode().decode("ascii", "ignore")) == len(s)
 
@@ -70,11 +51,6 @@ def colorstr(*input):
         "underline": "\033[4m",
     }
     return "".join(colors[x] for x in args) + f"{string}" + colors["end"]
-
-
-def methods(instance):
-    """Returns list of method names for a class/instance excluding dunder methods."""
-    return [f for f in dir(instance) if callable(getattr(instance, f)) and not f.startswith("__")]
 
 
 def set_logging(name=LOGGING_NAME, verbose=True):
@@ -132,7 +108,6 @@ class Profile(contextlib.ContextDecorator):
 
 
 class Timeout(contextlib.ContextDecorator):
-    # YOLOv5 Timeout class. Usage: @Timeout(seconds) decorator or 'with Timeout(seconds):' context manager
     def __init__(self, seconds, *, timeout_msg="", suppress_timeout_errors=True):
         self.seconds = int(seconds)
         self.timeout_message = timeout_msg
@@ -153,11 +128,6 @@ class WorkingDirectory(contextlib.ContextDecorator):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         os.chdir(self.cwd)
-
-
-def methods(instance):
-    # Get class/instance methods
-    return [f for f in dir(instance) if callable(getattr(instance, f)) and not f.startswith("__")]
 
 
 def print_args(args=None, show_file=True, show_func=False):
@@ -199,15 +169,8 @@ def file_size(path):
 
 
 def check_file(file, suffix=""):
-    # Search/download file (if necessary) and return path
-    # check_suffix(file, suffix)  # optional
     file = str(file)  # convert to str()
     if os.path.isfile(file) or not file:  # exists
-        return file
-    elif file.startswith("clearml://"):  # ClearML Dataset ID
-        assert (
-                "clearml" in sys.modules
-        ), "ClearML is not installed, so cannot use ClearML dataset. Try running 'pip install clearml'."
         return file
     else:  # search
         files = []
@@ -226,55 +189,3 @@ def xywh2xyxy(x):
     y[..., 2] = x[..., 0] + x[..., 2] / 2  # bottom right x
     y[..., 3] = x[..., 1] + x[..., 3] / 2  # bottom right y
     return y
-
-
-def increment_path(path, exist_ok=False, sep="", mkdir=False):
-    # Increment file or directory path, i.e. runs/exp --> runs/exp{sep}2, runs/exp{sep}3, ... etc.
-    path = Path(path)  # os-agnostic
-    if path.exists() and not exist_ok:
-        path, suffix = (path.with_suffix(""), path.suffix) if path.is_file() else (path, "")
-
-        # Method 1
-        for n in range(2, 9999):
-            p = f"{path}{sep}{n}{suffix}"  # increment path
-            if not os.path.exists(p):  #
-                break
-        path = Path(p)
-
-        # Method 2 (deprecated)
-        # dirs = glob.glob(f"{path}{sep}*")  # similar paths
-        # matches = [re.search(rf"{path.stem}{sep}(\d+)", d) for d in dirs]
-        # i = [int(m.groups()[0]) for m in matches if m]  # indices
-        # n = max(i) + 1 if i else 2  # increment number
-        # path = Path(f"{path}{sep}{n}{suffix}")  # increment path
-
-    if mkdir:
-        path.mkdir(parents=True, exist_ok=True)  # make directory
-
-    return path
-
-
-# OpenCV Multilanguage-friendly functions ------------------------------------------------------------------------------------
-imshow_ = cv2.imshow  # copy to avoid recursion errors
-
-
-def imread(filename, flags=cv2.IMREAD_COLOR):
-    return cv2.imdecode(np.fromfile(filename, np.uint8), flags)
-
-
-def imwrite(filename, img):
-    try:
-        cv2.imencode(Path(filename).suffix, img)[1].tofile(filename)
-        return True
-    except Exception:
-        return False
-
-
-def imshow(path, im):
-    imshow_(path.encode("unicode_escape").decode(), im)
-
-
-if Path(inspect.stack()[0].filename).parent.parent.as_posix() in inspect.stack()[-1].filename:
-    cv2.imread, cv2.imwrite, cv2.imshow = imread, imwrite, imshow  # redefine
-
-# Variables ------------------------------------------------------------------------------------------------------------

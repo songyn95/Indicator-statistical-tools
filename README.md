@@ -20,22 +20,8 @@
 
    
 
-###### 依赖环境
-
- - pandas
-
- - numpy
-
- - matplotlib
-
- - torch
-
- - xml
-
- - cv2
-
- - tqdm
-
+###### 安装环境(建议在conda环境下安装)
+	- pip install -r requirements
    
 
 ###### 操作流程
@@ -46,7 +32,7 @@
 	- python main.py --Manually-annotate-dir ./test_data/detect/image/gt --source-file ./test_data/detect/image/pred.txt  --img-path ./test/images   
 
 视频指标对比：
-	- python main.py --Manually-annotate-dir ./test_data/detect/video/gt --source-file ./test_data/detect/video/pred.txt  --data_type video
+	- python main.py --Manually-annotate-dir ./test_data/detect/video/gt --source-file ./test_data/detect/video/pred.txt  --data-path ./test_data/detect/video/images --data_type video --tensorboard
 ```
 
 
@@ -58,6 +44,7 @@
   - conf-thres-setting: conf 阈值 从0到1 划分为1000份，运行1000次，默认开启; 命令行使用后conf使用默认值0.25，只运行一次
   - save-csv-path: 保存conf阈值 从0到1 划分为1000份后的精度，召回率指标
   - data_type: 数据类型，image或者video
+  - tensorboard: 结果和曲线图web端展示
   
   
   

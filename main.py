@@ -46,7 +46,7 @@ def parse_opt():
     parser.add_argument("--Manually-annotate-dir", type=str, default=ROOT / "gt", help="annotate dir")
     parser.add_argument("--save-csv-path", type=str, default=ROOT / "result" / "result.csv",
                         help="Statistical Results Table, Threshold 0-1")
-    parser.add_argument("--data_type", default="images", help="images or video")
+    parser.add_argument("--data_type", default="image", help="image or video")
     parser.add_argument("--conf-thres", type=float, default=0.001, help="confidence threshold")
     parser.add_argument("--iou-thres", type=float, default=0.6, help="NMS IoU threshold")
     parser.add_argument("--imgsz", "--img", "--img-size", type=int, default=1920, help="img size")
@@ -68,7 +68,7 @@ def main(opt):
     :return:
     """
     t1 = time.time()
-    k = 1000
+    k = 10
     ##abs path
     opt.source_file = opt.source_file.replace(".\\", os.getcwd() + os.sep, 1) if str(opt.source_file).startswith(
         '.\\') else opt.source_file

@@ -88,7 +88,7 @@ class HandleFile:
         class_txt = dict()
         class_xml = defaultdict(list)
         # 匹配行
-        if self.data_type == "images":
+        if self.data_type == "image":
             matched_rows = self.fileinfo[self.fileinfo[0].str.contains(filename)].index.tolist()
         else:
             matched_rows = self.fileinfo[self.fileinfo.iloc[:, 1] == str(frameid)].index.tolist()
@@ -111,7 +111,7 @@ class HandleFile:
         # 过滤出的行
         class_info = fileinfo.iloc[:, k:]
 
-        if self.data_type == "images":
+        if self.data_type == "image":
             # txt
             for j in range(0, data_len, interval):
                 key = (class_info.iloc[0, j],)  # (class, id)
@@ -154,7 +154,7 @@ class HandleFile:
 
         # LOGGER.info(f"txt info:{class_txt}")
         # LOGGER.info(f"xml info:{class_xml}")
-        if self.data_type == "images":  # 图像名命名
+        if self.data_type == "image":  # 图像名命名
             if filename not in HandleFile.img_list:
                 HandleFile.img_list.append(filename)
                 file = Path(self.data_path) / filename

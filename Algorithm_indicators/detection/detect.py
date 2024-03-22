@@ -30,6 +30,7 @@ class Detect:
         self.gt_capture_nums = 0
         self.correct_capture_nums = 0
         self.capture_lists = []
+        self.gt_lists = []
         self.correct_capture_lists = []
 
     def set_conf(self, conf_thres):
@@ -55,6 +56,8 @@ class Detect:
             self.gt_capture_nums += len(xml_info)  # gt抓拍数
 
         for gt_key, gt_value in xml_info.items():
+            self.gt_lists.append(gt_key)
+
             txt_value = txt_info.get(gt_key, None)
             if txt_value is None:
                 continue
@@ -104,18 +107,18 @@ class Detect:
             # 2. 抓拍检准率: 正确抓拍真值数 / 总抓拍目标数
             # 3. 抓拍重复率: 重复抓拍真值数 / 正确抓拍真值数
 
-            capture_recall = round(len(set(self.correct_capture_lists)) / self.gt_capture_nums, 4)
+            capture_recall = round(len(set(self.correct_capture_lists)) / len(set(self.gt_lists)), 4)
             capture_precision = round(self.correct_capture_nums / self.detect_capture_nums, 4)
             capture_repetition = round(
                 (self.correct_capture_nums - len(set(self.correct_capture_lists))) / self.correct_capture_nums, 4)
 
             data = {"iou": self.iou, "Confidence": self.conf, "detect": self.detect_capture_nums,
-                    "gt": self.gt_capture_nums, "correct": self.correct_capture_nums,
+                    "gt": len(set(self.gt_lists)), "correct": self.correct_capture_nums,
                     "capture_repetition": capture_repetition, "capture_precision": capture_precision,
                     "capture_recall": capture_recall}
 
             LOGGER.info(
-                f'all gt capture nums:{colorstr(self.gt_capture_nums)}, all capture nums:'
+                f'all gt capture nums:{colorstr(len(set(self.gt_lists)))}, all capture nums:'
                 f'{colorstr(self.detect_capture_nums)}, correct capture nums:{colorstr(self.correct_capture_nums)}, '
                 f'repetition capture nums:{colorstr(self.correct_capture_nums - len(set(self.correct_capture_lists)))}\n'
                 'capture repetition:' + colorstr(f"{capture_repetition:.2%}") + ", capture precision: " + colorstr(

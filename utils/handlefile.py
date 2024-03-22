@@ -142,14 +142,10 @@ class HandleFile:
 
         class_xml = dict(class_xml)
         for xml_key, xml_value in class_xml.items():
-            # 总gt数量
-            self.detect.gt_nums += len(xml_value)
             class_xml[xml_key] = torch.Tensor(np.stack(xml_value).astype(np.float32))
 
             # tensor
         for txt_key, txt_value in class_txt.items():
-            # 总检测数据量
-            self.detect.detect_nums += len(txt_value)
             class_txt[txt_key] = torch.Tensor(np.stack(txt_value).astype(np.float32))
 
         # LOGGER.info(f"txt info:{class_txt}")
@@ -158,8 +154,6 @@ class HandleFile:
             if filename not in HandleFile.img_list:
                 HandleFile.img_list.append(filename)
                 file = Path(self.data_path) / filename
-                if not file.is_absolute():
-                    file = (ROOT / file).resolve()
                 plot_labels(class_xml, class_txt, str(file), self.save_path, self.data_type, self.tb)
 
                 if self.file_lines == len(HandleFile.img_list) and self.tb:
@@ -168,15 +162,13 @@ class HandleFile:
             if frameid not in HandleFile.img_list:
                 HandleFile.img_list.append(frameid)
                 file = Path(self.data_path) / (str(frameid) + '.jpg')
-                if not file.is_absolute():
-                    file = (ROOT / file).resolve()
                 plot_labels(class_xml, class_txt, str(file), self.save_path, self.data_type, self.tb)
 
                 if self.file_lines == len(HandleFile.img_list) and self.tb:
                     self.tb.close()
 
         # IOU
-        self.detect.compare_index(class_xml, class_txt, frameid)
+        self.detect.compare_index(class_xml, class_txt)
 
     def write_csv(self):
         data = self.detect.get_index()

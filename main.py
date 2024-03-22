@@ -68,12 +68,7 @@ def main(opt):
     :return:
     """
     t1 = time.time()
-    k = 10
-    ##abs path
-    opt.source_file = opt.source_file.replace(".\\", os.getcwd() + os.sep, 1) if str(opt.source_file).startswith(
-        '.\\') else opt.source_file
-    opt.Manually_annotate_dir = opt.Manually_annotate_dir.replace(".\\", os.getcwd() + os.sep, 1) if str(
-        opt.Manually_annotate_dir).startswith('.\\') else opt.Manually_annotate_dir
+    k = 1
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # 提交任务到线程池执行

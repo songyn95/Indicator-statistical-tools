@@ -27,7 +27,6 @@ class Detect:
         self.correct_detect_nums = 0
         # 抓拍
         self.detect_capture_nums = 0
-        self.gt_capture_nums = 0
         self.correct_capture_nums = 0
         self.capture_lists = []
         self.gt_lists = []
@@ -48,19 +47,24 @@ class Detect:
             if i not in self.capture_lists:
                 self.capture_lists.append(i)
 
-    def compare_index(self, xml_info, txt_info, frameid=None):
+    def compare_index(self, xml_info, txt_info):
         if self.data_type == "video":
             for key in txt_info.keys():
                 self.capture_lists.append(key)  # ('person',0) 总抓拍列表
             self.detect_capture_nums += len(txt_info)  # 总抓拍数
-            self.gt_capture_nums += len(xml_info)  # gt抓拍数
 
         for gt_key, gt_value in xml_info.items():
-            self.gt_lists.append(gt_key)
-
+            if self.data_type == "video":  # video每帧内id不重复,只需要添加gt_key
+                self.gt_lists.append(gt_key)
+            else:
+                # 总gt数量
+                self.gt_nums += gt_value.reshape(-1, 4).shape[0]
             txt_value = txt_info.get(gt_key, None)
             if txt_value is None:
                 continue
+            if self.data_type == "image":
+                # 总检测数据量
+                self.detect_nums += txt_value.reshape(-1, 5).shape[0]
 
             txt_value = txt_value[txt_value[:, 4] > self.conf]
             iou = self.compute_iou(gt_value, txt_value[:, :4])

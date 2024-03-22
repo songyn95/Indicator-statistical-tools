@@ -76,7 +76,7 @@ class Detect:
                 matches = np.zeros((0, 3))
 
             n = matches.shape[0]
-            if self.data_type == "images":
+            if self.data_type == "image":
                 self.correct_detect_nums += n
             else:
                 self.correct_capture_nums += n
@@ -84,7 +84,7 @@ class Detect:
             # LOGGER.info(f"match result:{matches}, nums:{matches.shape[0]}")
 
     def get_index(self, eps=1e-7):
-        if self.data_type == "images":
+        if self.data_type == "image":
             precision = round(self.correct_detect_nums / (self.detect_nums + eps), 4)
             recall = round(self.correct_detect_nums / (self.gt_nums + eps), 4)
 

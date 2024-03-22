@@ -48,7 +48,7 @@ class Dataset:
 
         except Exception as e:
             raise Exception(f"Error loading data from {self.path}:") from e
-        LOGGER.info(f'GT dataloader path: {self.path}\tbatch_size: {self.batch_size} ')
+        LOGGER.info(f'GT dataloader path: {Path(self.path).absolute()}\tbatch_size: {self.batch_size} ')
 
     def __getitem__(self, index):
         id_ = self.im_files[index]

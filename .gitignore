@@ -20,19 +20,11 @@
 *.data
 *.json
 *.cfg
-*.txt
-!video/pred.txt
-!image/pred.txt
 
 .git/objects/pack/pack-*
 
 results*.csv
 events.out.*
-# Datasets -------------------------------------------------------------------------------------------------------------
-images/*.jpg
-
-
-
 
 # GitHub Python GitIgnore ----------------------------------------------------------------------------------------------
 # Byte-compiled / optimized / DLL files

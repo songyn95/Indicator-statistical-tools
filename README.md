@@ -21,7 +21,7 @@
    
 
 ###### 安装环境(建议在conda环境下安装)
-	- pip install -r requirements
+	- pip install -r requirements.txt
    
 
 ###### 操作流程
@@ -29,7 +29,7 @@
 - 本代码提供了以下示例：      
 ```
 图像指标比对：
-	- python main.py --Manually-annotate-dir ./test_data/detect/image/gt --source-file ./test_data/detect/image/pred.txt  --img-path ./test/images   
+	- python main.py --Manually-annotate-dir ./test_data/detect/image/gt --source-file ./test_data/detect/image/pred.txt  --data-path ./test/images --tensorboard
 
 视频指标对比：
 	- python main.py --Manually-annotate-dir ./test_data/detect/video/gt --source-file ./test_data/detect/video/pred.txt  --data-path ./test_data/detect/video/images --data_type video --tensorboard

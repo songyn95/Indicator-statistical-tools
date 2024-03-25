@@ -68,7 +68,7 @@ def main(opt):
     :return:
     """
     t1 = time.time()
-    k = 1
+    k = 1000
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # 提交任务到线程池执行

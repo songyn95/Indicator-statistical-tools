@@ -21,16 +21,17 @@
 *.json
 *.cfg
 *.txt
+!video/pred.txt
+!image/pred.txt
 
 .git/objects/pack/pack-*
 
 results*.csv
 events.out.*
 # Datasets -------------------------------------------------------------------------------------------------------------
-images/*
+images/*.jpg
 
-!video/pred.txt
-!image/pred.txt
+
 
 
 # GitHub Python GitIgnore ----------------------------------------------------------------------------------------------

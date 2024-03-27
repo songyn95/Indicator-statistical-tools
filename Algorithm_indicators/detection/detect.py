@@ -23,8 +23,9 @@ class Detect:
         self.data_type = opt.data_type  # images or video
         # 图片检测
         self.gt_nums = 0
-        self.detect_nums = 0
-        self.correct_detect_nums = 0
+        self.detect_nums = 0  # 总检测数
+        self.correct_detect_nums = 0  # 正确检测数
+        self.fp = 0  # 误报
         # 抓拍
         self.detect_capture_nums = 0
         self.correct_capture_nums = 0
@@ -42,27 +43,7 @@ class Detect:
         # IoU = inter / (area1 + area2 - inter)
         return inter / ((a2 - a1).prod(2) + (b2 - b1).prod(2) - inter + eps)
 
-    def compute_id(self, ids):
-        for i in ids.tolist():
-            if i not in self.capture_lists:
-                self.capture_lists.append(i)
-
-    def are_keys_numeric(self, d):
-        total = []
-        include = []
-        for key in d:
-            try:
-                # 尝试将字符串转换为整数
-                numeric_key = key[0].isdigit()
-                include.append(numeric_key)
-                total += d[key].tolist()
-            except ValueError:
-                # 如果键不是数字字符串，则忽略它
-                pass
-        return torch.tensor(total), include
-
     def compare_index(self, xml_info, txt_info):
-
         for key, value in txt_info.items():
             if self.data_type == "video":
                 self.capture_lists.append(key)  # ('person',0) 总抓拍列表
@@ -70,69 +51,59 @@ class Detect:
             else:
                 self.detect_nums += value.reshape(-1, 5).shape[0]
 
-        # 总检测数据量
-        # 查找是否有track_id
-        digit_key, include_list = self.are_keys_numeric(txt_info)
-
         for gt_key, gt_value in xml_info.items():
+            gt_shape = gt_value.reshape(-1, 4).shape
             if self.data_type == "video":  # video每帧内id不重复,只需要添加gt_key
                 self.gt_lists.append(gt_key)
             else:
                 # 总gt数量
-                self.gt_nums += gt_value.reshape(-1, 4).shape[0]
+                self.gt_nums += gt_shape[0]
 
-            if "-1" in txt_info:  # -1 全部
-                txt_value = txt_info.get(-1)
+            for txt_key, txt_value in txt_info.items():
+                txt_shape = txt_value.reshape(-1, 5).shape
+                txt_value = txt_value[txt_value[:, 4] > self.conf]
+                iou = self.compute_iou(gt_value, txt_value[:, :4])
+                x = torch.where(iou > self.iou)  # filter iou
 
-            elif len(digit_key):  # 1,2全部
-                txt_value = digit_key
+                # LOGGER.info(f"iou result: {iou}, shape:{iou.shape}")
+                # LOGGER.info(f"x result: {x}")
+                if x[0].shape[0]:
+                    matches = torch.cat((torch.stack(x, 1), iou[x[0], x[1]][:, None]), 1).cpu().numpy()
 
-            else:
-                txt_value = txt_info.get(gt_key, None)
-
-            if txt_value is None:
-                continue
-
-            txt_value = txt_value[txt_value[:, 4] > self.conf]
-            iou = self.compute_iou(gt_value, txt_value[:, :4])
-            x = torch.where(iou > self.iou)  # filter iou
-
-            # LOGGER.info(f"iou result: {iou}, shape:{iou.shape}")
-            # LOGGER.info(f"x result: {x}")
-            if x[0].shape[0]:
-                matches = torch.cat((torch.stack(x, 1), iou[x[0], x[1]][:, None]), 1).cpu().numpy()
-                if x[0].shape[0] > 1:
-                    matches = matches[matches[:, 2].argsort()[::-1]]
-                    matches = matches[np.unique(matches[:, 1], return_index=True)[1]]
-                    matches = matches[matches[:, 2].argsort()[::-1]]
-                    matches = matches[np.unique(matches[:, 0], return_index=True)[1]]
-            else:
-                matches = np.zeros((0, 3))
-
-            n = matches.shape[0]
-            if self.data_type == "image":
-                self.correct_detect_nums += n
-            else:
-                self.correct_capture_nums += n
-                self.correct_capture_lists.append(gt_key)  # 一次只比对一个id（n==1），故直接添加即可
-            # LOGGER.info(f"match result:{matches}, nums:{matches.shape[0]}")
+                    if x[0].shape[0] > 1:
+                        matches = matches[matches[:, 2].argsort()[::-1]]
+                        matches = matches[np.unique(matches[:, 1], return_index=True)[1]]
+                        matches = matches[matches[:, 2].argsort()[::-1]]
+                        matches = matches[np.unique(matches[:, 0], return_index=True)[1]]
+                else:
+                    matches = np.zeros((0, 3))
+                n = matches.shape[0]
+                if gt_key == txt_key:
+                    if self.data_type == "image":
+                        self.correct_detect_nums += n
+                        self.fp += txt_shape[0] - n  # 误报
+                    else:
+                        self.correct_capture_nums += n
+                        self.correct_capture_lists.append(gt_key)  # 一次只比对一个id（n==1），故直接添加即可
 
     def get_index(self, eps=1e-7):
         if self.data_type == "image":
             precision = round(self.correct_detect_nums / (self.detect_nums + eps), 4)
             recall = round(self.correct_detect_nums / (self.gt_nums + eps), 4)
+            fpr = round(self.fp / (self.detect_nums + eps), 4)
+            fnr = round((1 - recall), 4)
 
             data = {"iou": self.iou, "Confidence": self.conf, "correct": self.correct_detect_nums,
-                    "gt": self.gt_nums, "detect": self.detect_nums, "precision": precision,
+                    "gt": self.gt_nums, "detect": self.detect_nums, "FPR": fpr, "FNR": fnr, "precision": precision,
                     "recall": recall}
 
             LOGGER.info(
                 f'all gt nums: {colorstr(self.gt_nums)}, all detect nums: {colorstr(self.detect_nums)}, '
-                f'correct detect nums: {colorstr(self.correct_detect_nums)}\n'
-                'precision: ' + colorstr(f"{self.correct_detect_nums / (self.detect_nums + eps):.2%}") +
-                ', recall: ' + colorstr(f"{self.correct_detect_nums / (self.gt_nums + eps):.2%}") + '\n'
+                f'correct nums: {self.correct_detect_nums}, false positive nums: {colorstr(self.fp)}, '
+                'false positive rate:' + colorstr(f"{fpr:.2%}") + ', false negative rate:' + colorstr(
+                    f"{fnr:.2%}") + '\nprecision: ' + colorstr(f"{precision:.2%}") + ', recall: ' + colorstr(
+                    f"{recall:.2%}") + '\n'
             )
-
         else:
             # 1. 抓拍召回率:（正确抓拍真值数-重复抓拍真值数）/ 总真值数
             # 2. 抓拍检准率: 正确抓拍真值数 / 总抓拍目标数

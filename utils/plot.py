@@ -143,14 +143,20 @@ def plot_evolve(evolve_csv="result.csv"):
     df_data = pd.read_csv(evolve_csv, header=None)
     data = df_data.sort_values(by=1)
     x = data.values[:, ]
-    plt.figure(figsize=(10, 12), tight_layout=True)
+    fig = plt.figure(figsize=(10, 12), tight_layout=True)
     matplotlib.rc("font", **{"size": 8})
 
-    plt.plot(x[:, -2], x[:, -1])
-    plt.title(f"iou:(0-1) PR curves")
+    ax1 = fig.add_subplot(2, 1, 1)
+    ax1.plot(x[:, -2], x[:, -1])
+    ax1.set_title('PR curves')
+
+    ax1 = fig.add_subplot(2, 1, 2)
+    ax1.plot(x[:, -4], x[:, -1])
+    ax1.set_title('ROC curves')
+    # plt.plot(x[:, -2], x[:, -1])
+    # plt.title(f"iou:(0-1) PR curves")
     f = evolve_csv.with_suffix(".png")  # filename
-    plt.savefig(f, dpi=200)
-    plt.close()
+    fig.savefig(f, dpi=200)
     print(f"Saved {f}")
 
 

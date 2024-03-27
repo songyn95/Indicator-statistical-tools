@@ -63,7 +63,7 @@ class Dataset:
         frameid = list()
         obj_id = list()
 
-        filename = anno.find('path').text.strip().split('\\')[-1]  ## filename 000001.jpg or 000001.mp4
+        filename = anno.find('filename').text.strip()  ## filename 000001.jpg or 000001.mp4
         if self.data_type == 'video':
             frameid.append(anno.find('framenumber').text)
 

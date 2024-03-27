@@ -94,8 +94,10 @@ class HandleFile:
             matched_rows = self.fileinfo[self.fileinfo.iloc[:, 1] == str(frameid)].index.tolist()
 
         # LOGGER.info(f"match:{matched_rows}{type(matched_rows)}")
+        if len(matched_rows) > 1:
+            LOGGER.warning(f"match len more than 1:{len(matched_rows)}")
         if not matched_rows:
-            LOGGER.error(f"error No XML found for txt:{filename}")
+            LOGGER.error(f"error No XML found for txt:{filename},len:{len(matched_rows)}")
             raise FileNotFoundError(f"{filename} does not exist")
 
         # 取行
@@ -116,12 +118,14 @@ class HandleFile:
             for j in range(0, data_len, interval):
                 key = (class_info.iloc[0, j],)  # (class, id)
                 img_info = class_info.iloc[:, j + 1:j + interval].values.astype('float').flatten()
+
                 if key and key not in class_txt:
                     class_txt[key] = [img_info]
                 else:
                     class_txt[key] += [img_info]
             # xml
-            obj_info[k + 1] = obj_info[k + 1].squeeze().tolist()  # 降维
+            obj_info[k + 1] = obj_info[k + 1].reshape(-1, 4).tolist()  # 降维
+
             for key, value in zip(obj_info[k], obj_info[k + 1]):
                 class_xml[(key,)].append(value)
 
@@ -135,8 +139,9 @@ class HandleFile:
                 else:
                     class_txt[key] += [img_info]
             # xml
-            obj_info[k + 1] = obj_info[k + 1].flatten().tolist()  # id降维
-            obj_info[k + 2] = obj_info[k + 2].squeeze().tolist()  # bbox降维
+            obj_info[k + 1] = obj_info[k + 1].reshape(-1, 4).tolist()  # id降维
+            obj_info[k + 2] = obj_info[k + 2].reshape(-1, 4).tolist()  # bbox降维
+
             for key, value1, value2 in zip(obj_info[k], obj_info[k + 1], obj_info[k + 2]):
                 class_xml[(key, value1)].append(value2)
 

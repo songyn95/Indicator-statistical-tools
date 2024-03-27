@@ -47,11 +47,32 @@ class Detect:
             if i not in self.capture_lists:
                 self.capture_lists.append(i)
 
+    def are_keys_numeric(self, d):
+        total = []
+        include = []
+        for key in d:
+            try:
+                # 尝试将字符串转换为整数
+                numeric_key = key[0].isdigit()
+                include.append(numeric_key)
+                total += d[key].tolist()
+            except ValueError:
+                # 如果键不是数字字符串，则忽略它
+                pass
+        return torch.tensor(total), include
+
     def compare_index(self, xml_info, txt_info):
-        if self.data_type == "video":
-            for key in txt_info.keys():
+
+        for key, value in txt_info.items():
+            if self.data_type == "video":
                 self.capture_lists.append(key)  # ('person',0) 总抓拍列表
-            self.detect_capture_nums += len(txt_info)  # 总抓拍数
+                self.detect_capture_nums += value.reshape(-1, 5).shape[0]  # 总抓拍数
+            else:
+                self.detect_nums += value.reshape(-1, 5).shape[0]
+
+        # 总检测数据量
+        # 查找是否有track_id
+        digit_key, include_list = self.are_keys_numeric(txt_info)
 
         for gt_key, gt_value in xml_info.items():
             if self.data_type == "video":  # video每帧内id不重复,只需要添加gt_key
@@ -59,12 +80,18 @@ class Detect:
             else:
                 # 总gt数量
                 self.gt_nums += gt_value.reshape(-1, 4).shape[0]
-            txt_value = txt_info.get(gt_key, None)
+
+            if "-1" in txt_info:  # -1 全部
+                txt_value = txt_info.get(-1)
+
+            elif len(digit_key):  # 1,2全部
+                txt_value = digit_key
+
+            else:
+                txt_value = txt_info.get(gt_key, None)
+
             if txt_value is None:
                 continue
-            if self.data_type == "image":
-                # 总检测数据量
-                self.detect_nums += txt_value.reshape(-1, 5).shape[0]
 
             txt_value = txt_value[txt_value[:, 4] > self.conf]
             iou = self.compute_iou(gt_value, txt_value[:, :4])

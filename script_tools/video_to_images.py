@@ -4,7 +4,7 @@ import sys
 
 import cv2
 import numpy as np
-
+from pathlib import Path
 
 def bgr_to_nv12(rgbData):
     yuvData = cv2.cvtColor(rgbData, cv2.COLOR_BGR2YUV_I420)
@@ -57,16 +57,15 @@ def resize_keep_ratio(img, input_size):
 
 
 if __name__ == '__main__':
-    video_path = r"D:\X-AnyLabeling\1066.mp4"
-    input_video = cv2.VideoCapture(video_path)
-    savd_img_dirpath = r"..\test_data\detect\video\images"
 
+    video_path = r"H:\精度统计工具测试视频\xiangcunjiedao3-baitian.mp4"# 25帧抽取1帧
+    input_video = cv2.VideoCapture(video_path)
+    savd_img_dirpath = Path(video_path.split('\\')[-1]).stem
     if not os.path.exists(savd_img_dirpath):
         os.mkdir(savd_img_dirpath)
 
-    index = 0
-    frame_id = 0
-    frame_rate = 1  # 每帧都抽取
+    frame_id = -1
+    frame_rate = 25  # 25帧抽取1帧
 
     while True:
         frame_id += 1
@@ -79,14 +78,11 @@ if __name__ == '__main__':
             continue
 
         if frame is not None:
-            print("%d" % frame_id)
+            print(f"frame id :{frame_id}")
+
             # save jpg
-            savd_img_filename = savd_img_dirpath + "\{}.jpg".format(index)
-            # print(savd_img_filename)
+            savd_img_filename = savd_img_dirpath + "\{}.jpg".format(frame_id)
             cv2.imwrite(savd_img_filename, frame)
 
-            index += 1
-            if index > 100:
-                break
         else:
             break

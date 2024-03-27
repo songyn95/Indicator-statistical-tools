@@ -59,32 +59,34 @@ class Detect:
                 # 总gt数量
                 self.gt_nums += gt_shape[0]
 
-            for txt_key, txt_value in txt_info.items():
-                txt_shape = txt_value.reshape(-1, 5).shape
-                txt_value = txt_value[txt_value[:, 4] > self.conf]
-                iou = self.compute_iou(gt_value, txt_value[:, :4])
-                x = torch.where(iou > self.iou)  # filter iou
+            # for txt_key, txt_value in txt_info.items():
+            txt_value = txt_info.get(gt_key, None)
+            if txt_value is None:
+                continue
+            txt_shape = txt_value.reshape(-1, 5).shape
+            txt_value = txt_value[txt_value[:, 4] > self.conf]
+            iou = self.compute_iou(gt_value, txt_value[:, :4])
+            x = torch.where(iou > self.iou)  # filter iou
 
-                # LOGGER.info(f"iou result: {iou}, shape:{iou.shape}")
-                # LOGGER.info(f"x result: {x}")
-                if x[0].shape[0]:
-                    matches = torch.cat((torch.stack(x, 1), iou[x[0], x[1]][:, None]), 1).cpu().numpy()
+            # LOGGER.info(f"iou result: {iou}, shape:{iou.shape}")
+            # LOGGER.info(f"x result: {x}")
+            if x[0].shape[0]:
+                matches = torch.cat((torch.stack(x, 1), iou[x[0], x[1]][:, None]), 1).cpu().numpy()
 
-                    if x[0].shape[0] > 1:
-                        matches = matches[matches[:, 2].argsort()[::-1]]
-                        matches = matches[np.unique(matches[:, 1], return_index=True)[1]]
-                        matches = matches[matches[:, 2].argsort()[::-1]]
-                        matches = matches[np.unique(matches[:, 0], return_index=True)[1]]
-                else:
-                    matches = np.zeros((0, 3))
-                n = matches.shape[0]
-                if gt_key == txt_key:
-                    if self.data_type == "image":
-                        self.correct_detect_nums += n
-                        self.fp += txt_shape[0] - n  # 误报
-                    else:
-                        self.correct_capture_nums += n
-                        self.correct_capture_lists.append(gt_key)  # 一次只比对一个id（n==1），故直接添加即可
+                if x[0].shape[0] > 1:
+                    matches = matches[matches[:, 2].argsort()[::-1]]
+                    matches = matches[np.unique(matches[:, 1], return_index=True)[1]]
+                    matches = matches[matches[:, 2].argsort()[::-1]]
+                    matches = matches[np.unique(matches[:, 0], return_index=True)[1]]
+            else:
+                matches = np.zeros((0, 3))
+            n = matches.shape[0]
+            if self.data_type == "image":
+                self.correct_detect_nums += n
+                self.fp += txt_shape[0] - n  # 误报
+            else:
+                self.correct_capture_nums += n
+                self.correct_capture_lists.append(gt_key)  # 一次只比对一个id（n==1），故直接添加即可
 
     def get_index(self, eps=1e-7):
         if self.data_type == "image":

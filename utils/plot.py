@@ -151,12 +151,12 @@ def plot_evolve(evolve_csv="result.csv"):
     ax1.set_title('PR curves')
 
     ax1 = fig.add_subplot(2, 1, 2)
-    ax1.plot(x[:, -4], x[:, -1])
+    ax1.plot(x[:, -3][::-1], x[:, -1][::-1])
     ax1.set_title('ROC curves')
     # plt.plot(x[:, -2], x[:, -1])
     # plt.title(f"iou:(0-1) PR curves")
     f = evolve_csv.with_suffix(".png")  # filename
-    fig.savefig(f, dpi=200)
+    fig.savefig(f, dpi=400)
     print(f"Saved {f}")
 
 

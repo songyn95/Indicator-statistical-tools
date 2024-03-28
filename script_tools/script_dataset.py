@@ -34,6 +34,26 @@ def plot_evolve(evolve_csv=ROOT / "result.csv"):
     plt.close()
     print(f"Saved {f}")
 
+def plot(evolve_csv="result.csv"):
+    evolve_csv = Path(evolve_csv)
+    df_data = pd.read_csv(evolve_csv, header=None)
+    data = df_data.sort_values(by=1)
+    x = data.values[:, ]
+    fig = plt.figure(figsize=(10, 12), tight_layout=True)
+    matplotlib.rc("font", **{"size": 8})
+
+    ax1 = fig.add_subplot(2, 1, 1)
+    ax1.plot(x[:, -2], x[:, -1])
+    ax1.set_title('PR curves')
+
+    ax1 = fig.add_subplot(2, 1, 2)
+    ax1.plot(x[:, -3][::-1], x[:, -1][::-1])
+    ax1.set_title('ROC curves')
+    # plt.plot(x[:, -2], x[:, -1])
+    # plt.title(f"iou:(0-1) PR curves")
+    f = evolve_csv.with_suffix(".png")  # filename
+    fig.savefig(f, dpi=400)
+    print(f"Saved {f}")
 
 class Dataset:
     def __init__(self, path, batch_size=1):
@@ -118,8 +138,8 @@ class Dataset:
 
 
 if __name__ == '__main__':
-    # plot_evolve()
-    dataset = Dataset(ROOT / "test_data" / 'detect' / "video" / "gt")
-    with open(ROOT / "test_data" / 'detect' / "video" / 'pred.txt', 'w', encoding='utf-8') as f:
-        # dataset.convert_image_xml_txt()
-        dataset.convert_video_xml_txt()
+    plot('../result/result.csv')
+    # dataset = Dataset(ROOT / "test_data" / 'detect' / "video" / "gt")
+    # with open(ROOT / "test_data" / 'detect' / "video" / 'pred.txt', 'w', encoding='utf-8') as f:
+    #     dataset.convert_image_xml_txt()
+        # dataset.convert_video_xml_txt()

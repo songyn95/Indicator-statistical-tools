@@ -103,7 +103,8 @@ class Detect:
                 f'all gt nums: {colorstr(self.gt_nums)}, all detect nums: {colorstr(self.detect_nums)}\n'
                 f'correct nums: {colorstr(self.correct_detect_nums)},  false negative nums: {colorstr(fn)}, '
                 f'false positive nums: {colorstr(fp)}\n'
-                'false positive rate: ' + colorstr(f"{fpr:.2%}") + ', false negative rate: ' + colorstr(f"{fnr:.2%}") + '\n'
+                'false positive rate: ' + colorstr(f"{fpr:.2%}") + ', false negative rate: ' + colorstr(
+                    f"{fnr:.2%}") + '\n'
                 + 'precision: ' + colorstr(f"{precision:.2%}") + ', recall: ' + colorstr(f"{recall:.2%}") + '\n'
             )
         else:

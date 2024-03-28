@@ -36,10 +36,11 @@ class HandleFile:
     def __init__(self, opt):
         self.data_path = opt.data_path
         self.save_path = opt.save_data_path
-        self.save_csv_path = opt.save_csv_path  # save csv path
+        self.result_file = opt.result_file  # save csv path
         self.data_type = opt.data_type  # images or video
         # TensorBoard
         self.save_dir = opt.save_dir
+        self.plot = opt.plot
         self.tb = None
         if opt.tensorboard:
             prefix = colorstr("TensorBoard: ")
@@ -155,33 +156,34 @@ class HandleFile:
 
         # LOGGER.info(f"txt info:{class_txt}")
         # LOGGER.info(f"xml info:{class_xml}")
-        if self.data_type == "image":  # 图像名命名
-            if filename not in HandleFile.img_list:
-                HandleFile.img_list.append(filename)
-                file = Path(self.data_path) / filename
-                plot_labels(class_xml, class_txt, str(file), self.save_path, self.data_type, self.tb)
+        if self.plot:
+            if self.data_type == "image":  # 图像名命名
+                if filename not in HandleFile.img_list:
+                    HandleFile.img_list.append(filename)
+                    file = Path(self.data_path) / filename
+                    plot_labels(class_xml, class_txt, str(file), self.save_path, self.data_type, self.tb)
 
-                if self.file_lines == len(HandleFile.img_list) and self.tb:
-                    self.tb.close()
-        else:  # video 以帧号命名的图像
-            if frameid not in HandleFile.img_list:
-                HandleFile.img_list.append(frameid)
-                file = Path(self.data_path) / (str(frameid) + '.jpg')
-                plot_labels(class_xml, class_txt, str(file), self.save_path, self.data_type, self.tb)
+                    if self.file_lines == len(HandleFile.img_list) and self.tb:
+                        self.tb.close()
+            else:  # video 以帧号命名的图像
+                if frameid not in HandleFile.img_list:
+                    HandleFile.img_list.append(frameid)
+                    file = Path(self.data_path) / (str(frameid) + '.jpg')
+                    plot_labels(class_xml, class_txt, str(file), self.save_path, self.data_type, self.tb)
 
-                if self.file_lines == len(HandleFile.img_list) and self.tb:
-                    self.tb.close()
+                    if self.file_lines == len(HandleFile.img_list) and self.tb:
+                        self.tb.close()
 
         # IOU
         self.detect.compare_index(class_xml, class_txt)
 
     def write_csv(self):
         data = self.detect.get_index()
-        write_to_csv(data, self.save_csv_path)
+        write_to_csv(data, self.result_file)
 
     @staticmethod
     def plot_evolve(opt):
-        evolve_csv = opt.save_csv_path
+        evolve_csv = opt.result_file
         plot_evolve(evolve_csv)
         # add image
         file = evolve_csv.with_suffix(".png")

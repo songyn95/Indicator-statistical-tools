@@ -34,6 +34,7 @@ def plot_evolve(evolve_csv=ROOT / "result.csv"):
     plt.close()
     print(f"Saved {f}")
 
+
 def plot(evolve_csv="result.csv"):
     evolve_csv = Path(evolve_csv)
     df_data = pd.read_csv(evolve_csv, header=None)
@@ -44,16 +45,25 @@ def plot(evolve_csv="result.csv"):
 
     ax1 = fig.add_subplot(2, 1, 1)
     ax1.plot(x[:, -2], x[:, -1])
-    ax1.set_title('PR curves')
+    ax1.set_xlabel('precision')
+    ax1.set_ylabel('recall')
+    ax1.set_title('PR curve')
+    ax1.set_xlim(-0.01, 1.01)
+    ax1.set_ylim(-0.01, 1.01)
 
     ax1 = fig.add_subplot(2, 1, 2)
     ax1.plot(x[:, -3][::-1], x[:, -1][::-1])
-    ax1.set_title('ROC curves')
+    ax1.set_xlabel('FPR')
+    ax1.set_ylabel('TPR')
+    ax1.set_title('ROC curve')
+    ax1.set_xlim(-0.01, 1.01)
+    ax1.set_ylim(-0.01, 1.01)
     # plt.plot(x[:, -2], x[:, -1])
     # plt.title(f"iou:(0-1) PR curves")
     f = evolve_csv.with_suffix(".png")  # filename
-    fig.savefig(f, dpi=400)
+    fig.savefig(f, dpi=600)
     print(f"Saved {f}")
+
 
 class Dataset:
     def __init__(self, path, batch_size=1):
@@ -142,4 +152,4 @@ if __name__ == '__main__':
     # dataset = Dataset(ROOT / "test_data" / 'detect' / "video" / "gt")
     # with open(ROOT / "test_data" / 'detect' / "video" / 'pred.txt', 'w', encoding='utf-8') as f:
     #     dataset.convert_image_xml_txt()
-        # dataset.convert_video_xml_txt()
+    # dataset.convert_video_xml_txt()

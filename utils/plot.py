@@ -19,6 +19,7 @@ import csv
 import pandas as pd
 from pathlib import Path
 import torch
+from .general import LOGGER
 
 
 class Colors:
@@ -148,16 +149,24 @@ def plot_evolve(evolve_csv="result.csv"):
 
     ax1 = fig.add_subplot(2, 1, 1)
     ax1.plot(x[:, -2], x[:, -1])
-    ax1.set_title('PR curves')
+    ax1.set_xlabel('precision')
+    ax1.set_ylabel('recall')
+    ax1.set_title('PR curve')
+    ax1.set_xlim(-0.01, 1.01)
+    ax1.set_ylim(-0.01, 1.01)
 
     ax1 = fig.add_subplot(2, 1, 2)
     ax1.plot(x[:, -3][::-1], x[:, -1][::-1])
-    ax1.set_title('ROC curves')
+    ax1.set_xlabel('FPR')
+    ax1.set_ylabel('TPR')
+    ax1.set_title('ROC curve')
+    ax1.set_xlim(-0.01, 1.01)
+    ax1.set_ylim(-0.01, 1.01)
     # plt.plot(x[:, -2], x[:, -1])
     # plt.title(f"iou:(0-1) PR curves")
     f = evolve_csv.with_suffix(".png")  # filename
-    fig.savefig(f, dpi=400)
-    print(f"Saved {f}")
+    fig.savefig(f, dpi=600)
+    LOGGER.info(f"Saved {f}")
 
 
 def plot_labels(xml_info, txt_info, filename, save_img_path, data_type="images", tb=None):
@@ -188,8 +197,6 @@ def plot_labels(xml_info, txt_info, filename, save_img_path, data_type="images",
         for j, box in enumerate(txt_value.tolist()):
             annotator.box_label(box, str(txt_key), color=(0, 0, 255))
 
-    if not os.path.exists(save_img_path):
-        os.mkdir(save_img_path)
     file = os.path.join(save_img_path, filename.split(os.sep)[-1])
     cv2.imwrite(file, annotator.im)  # save
 

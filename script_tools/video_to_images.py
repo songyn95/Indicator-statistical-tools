@@ -58,14 +58,15 @@ def resize_keep_ratio(img, input_size):
 
 if __name__ == '__main__':
 
-    video_path = r"H:\精度统计工具测试视频\xiangcunjiedao3-baitian.mp4"# 25帧抽取1帧
+    video_path = r"H:\精度统计工具测试视频\yuanqudaolu-baitian.mp4"# 5帧抽取1帧
+    # video_path = r"H:\精度统计工具测试视频\xiangcunjiedao3-baitian.mp4"# 25帧抽取1帧
     input_video = cv2.VideoCapture(video_path)
     savd_img_dirpath = Path(video_path.split('\\')[-1]).stem
     if not os.path.exists(savd_img_dirpath):
         os.mkdir(savd_img_dirpath)
 
     frame_id = -1
-    frame_rate = 25  # 25帧抽取1帧
+    frame_rate = 5  # yuanqudaolu-baitian帧抽取1帧
 
     while True:
         frame_id += 1

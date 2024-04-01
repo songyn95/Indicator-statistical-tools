@@ -160,8 +160,8 @@ def plot_evolve(evolve_csv="result.csv"):
     ax1.set_xlabel('FPR')
     ax1.set_ylabel('TPR')
     ax1.set_title('ROC curve')
-    ax1.set_xlim(-0.01, 1.01)
-    ax1.set_ylim(-0.01, 1.01)
+    ax1.set_xlim(-0.001, 1.001)
+    ax1.set_ylim(-0.001, 1.001)
     # plt.plot(x[:, -2], x[:, -1])
     # plt.title(f"iou:(0-1) PR curves")
     f = evolve_csv.with_suffix(".png")  # filename
